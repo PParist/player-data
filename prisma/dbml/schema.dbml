@@ -1,0 +1,85 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table permissions {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [not null]
+  code String [not null]
+  description String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  updatedAt DateTime [not null]
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  rolePermissions role_permissions [not null]
+}
+
+Table role_permissions {
+  id Int [pk, increment]
+  roleUuid String [not null]
+  permissionUuid String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  updatedAt DateTime [not null]
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  permissions permissions [not null]
+  roles roles [not null]
+}
+
+Table roles {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  name String [unique, not null]
+  description String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  updatedAt DateTime [not null]
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  rolePermissions role_permissions [not null]
+  userAccounts user_accounts [not null]
+}
+
+Table user_accounts {
+  id Int [pk, increment]
+  uuid String [unique, not null]
+  description String [not null]
+  email String [unique, not null]
+  roleUuid String
+  loginType LoginType [not null]
+  loginToken String [not null]
+  deviceUuid String [not null]
+  ipAddress String [not null]
+  createdAt DateTime [not null]
+  createdBy String [not null]
+  updatedAt DateTime [not null]
+  updatedBy String [not null]
+  deletedAt DateTime
+  deletedBy String
+  version String [not null]
+  roles roles
+}
+
+Enum LoginType {
+  NONE
+  GOOGLE
+  FACEBOOK
+  APPLE
+  HUAWEI
+  GUEST
+}
+
+Ref: role_permissions.permissionUuid > permissions.uuid
+
+Ref: role_permissions.roleUuid > roles.uuid
+
+Ref: user_accounts.roleUuid > roles.uuid
