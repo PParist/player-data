@@ -1,9 +1,8 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
-}
-
-generator dbml {
-  provider = "prisma-dbml-generator"
 }
 
 datasource db {
@@ -11,84 +10,98 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Permissions {
-  id               Int                @id @default(autoincrement())
-  uuid             String             @unique
-  name             String             @map("name")
-  code             String             @map("code")
-  description      String             @map("description")
-  createdAt        DateTime           @map("created_at")
-  createdBy        String             @map("created_by")
-  updatedAt        DateTime           @map("updated_at")
-  updatedBy        String             @map("updated_by")
-  deletedAt        DateTime?          @map("deleted_at")
-  deletedBy        String?            @map("deleted_by")
-  version          String             @map("version")
-  rolePermissions  RolePermissions[]
+model PlayerProfile {
+  id                   Int                     @id
+  uuid                 String                  @unique
+  userAccountUuid      String                  @map("user_account_uuid")
+  name                 String                  @unique
+  description          String?
+  imageUrl             String?                 @map("image_url")
+  level                Int
+  exp                  Int
+  currentMana          Int                     @map("current_mana")
+  maxMana              Int                     @map("max_mana")
+  zeny                 Int
+  crystalShard         Int                     @map("crystal_shard")
+  goldenPoringCoin     Int                     @map("golden_poring_coin")
+  poringCoin           Int                     @map("poring_coin")
+  gachaponTicket       Int                     @map("gachapon_ticket")
+  createdAt            DateTime                @map("created_at")
+  createdBy            String                  @map("created_by")
+  updatedAt            DateTime                @map("updated_at")
+  updatedBy            String                  @map("updated_by")
+  deletedAt            DateTime?               @map("deleted_at")
+  deletedBy            String?                 @map("deleted_by")
+  version              Int
+  characterCustomizations CharacterCustomization[]
 
-  @@map("permissions")
+  @@map("player_profiles")
 }
 
-model RolePermissions {
-  id              Int         @id @default(autoincrement())
-  roleUuid        String       @map("role_uuid")
-  permissionUuid  String       @map("permission_uuid")
-  createdAt       DateTime     @map("created_at")
-  createdBy       String       @map("created_by")
-  updatedAt       DateTime     @map("updated_at")
-  updatedBy       String       @map("updated_by")
-  deletedAt       DateTime?    @map("deleted_at")
-  deletedBy       String?      @map("deleted_by")
-  version         String       @map("version")
-  permissions     Permissions  @relation(fields: [permissionUuid], references: [uuid])
-  roles           Roles        @relation(fields: [roleUuid], references: [uuid])
+model CustomeBase {
+  id                   Int                     @id
+  uuid                 String                  @unique
+  equipmentId          String                  @unique @map("equipment_id")
+  name                 String
+  info                 String?
+  imageUrl             String?                 @map("image_url")
+  prefabUrl            String?                 @map("prefab_url")
+  model                Int
+  isDefault            Int                     @map("is_default")
+  isColorable          Int                     @map("is_colorable")
+  currentColor         String?                 @map("current_color")
+  colors               String?
+  equipType            Int                     @map("equip_type")
+  tier                 Int
+  createdAt            DateTime                @map("created_at")
+  createdBy            String                  @map("created_by")
+  updatedAt            DateTime                @map("updated_at")
+  updatedBy            String                  @map("updated_by")
+  deletedAt            DateTime?               @map("deleted_at")
+  deletedBy            String?                 @map("deleted_by")
+  version              Int
+  characterCustomizations CharacterCustomization[]
 
-  @@map("role_permissions")
+  @@map("custome_bases")
 }
 
-model Roles {
-  id              Int                @id @default(autoincrement())
-  uuid            String             @unique
-  name            String             @unique
-  description     String             @map("description")
-  createdAt       DateTime           @map("created_at")
-  createdBy       String             @map("created_by")
-  updatedAt       DateTime           @map("updated_at")
-  updatedBy       String             @map("updated_by")
-  deletedAt       DateTime?          @map("deleted_at")
-  deletedBy       String?            @map("deleted_by")
-  version         String             @map("version")
-  rolePermissions RolePermissions[]
-  userAccounts    UserAccounts[]
-  @@map("roles")
+model CharacterCustomization {
+  id                   Int                     @id
+  uuid                 String                  @unique
+  playerUuid           String                  @map("player_uuid")
+  customeBaseUuid      String                  @map("custome_base_uuid")
+  obtainUuid           String                  @map("obtain_uuid")
+  obtainDate           DateTime                @map("obtain_date")
+  isFashion            Int                     @map("is_fashion")
+  isActive             Int                     @map("is_active")
+  isEquiped            Int                     @map("is_equiped")
+  createdAt            DateTime                @map("created_at")
+  createdBy            String                  @map("created_by")
+  updatedAt            DateTime                @map("updated_at")
+  updatedBy            String                  @map("updated_by")
+  deletedAt            DateTime?               @map("deleted_at")
+  deletedBy            String?                 @map("deleted_by")
+  version              Int
+  player               PlayerProfile           @relation(fields: [playerUuid], references: [uuid])
+  customeBase          CustomeBase             @relation(fields: [customeBaseUuid], references: [uuid])
+  obtainBase           ObtainBase              @relation(fields: [obtainUuid], references: [uuid])
+
+  @@map("character_customizations")
 }
 
-model UserAccounts {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique
-  description String    @map("description")
-  email       String    @unique
-  roleUuid    String?   @map("role_uuid")
-  loginType   LoginType @map("login_type")
-  loginToken  String    @map("login_token")
-  deviceUuid  String    @map("device_uuid")
-  ipAddress   String    @map("ip_address")
-  createdAt   DateTime  @map("created_at")
-  createdBy   String    @map("created_by")
-  updatedAt   DateTime  @map("updated_at")
-  updatedBy   String    @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at")
-  deletedBy   String?   @map("deleted_by")
-  version     String    @map("version")
-  roles       Roles?    @relation(fields: [roleUuid], references: [uuid])
-  @@map("user_accounts")
-}
+model ObtainBase {
+  id                   Int                     @id
+  uuid                 String                  @unique
+  obtainType           String                  @map("obtain_type")
+  typeUuid             String                  @map("type_uuid")
+  createdAt            DateTime                @map("created_at")
+  createdBy            String                  @map("created_by")
+  updatedAt            DateTime                @map("updated_at")
+  updatedBy            String                  @map("updated_by")
+  deletedAt            DateTime?               @map("deleted_at")
+  deletedBy            String?                 @map("deleted_by")
+  version              Int
+  characterCustomizations CharacterCustomization[]
 
-enum LoginType {
-  NONE
-  GOOGLE
-  FACEBOOK
-  APPLE
-  HUAWEI
-  GUEST
+  @@map("obtain_bases")
 }
