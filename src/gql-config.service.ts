@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { ApolloDriverConfig } from '@nestjs/apollo';
 import { Injectable } from '@nestjs/common';
 import { GqlOptionsFactory } from '@nestjs/graphql';
+import { authDirectiveTransformer } from 'src/common/graphql/auth_directive';
+import { addDirectiveDefinitionsToSchema } from 'src/common/utils/schema.utils';
 
 @Injectable()
 export class GqlConfigService implements GqlOptionsFactory {
@@ -15,13 +17,25 @@ export class GqlConfigService implements GqlOptionsFactory {
       sortSchema: graphqlConfig.sortSchema,
       buildSchemaOptions: {
         numberScalarMode: 'integer',
-        //dateScalarMode: 'isoDate',
       },
       // subscription
       installSubscriptionHandlers: true,
       includeStacktraceInErrorResponses: graphqlConfig.debug,
       playground: graphqlConfig.playgroundEnabled,
       context: ({ req }) => ({ req }),
+      transformSchema: (schema) => {
+        schema = addDirectiveDefinitionsToSchema(schema, `
+          enum Rule {
+            ADMIN
+            USER
+            GUEST
+          }
+          directive @auth(rule: String!) on FIELD_DEFINITION
+        `);
+        schema = authDirectiveTransformer(schema);
+        
+        return schema;
+      },
     };
   }
 }

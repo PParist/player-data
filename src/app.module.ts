@@ -6,14 +6,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppResolver } from './app.resolver';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GqlConfigService } from './gql-config.service';
-import { RolesModule } from './roles/roles.module';
 import { DateScalar } from './common/scalars/date.scalar';
 
 import { registerGraphQLEnums } from './common/graphql/enums';
+import { ObtainBaseModule } from './obtain_base/obtain_base.module';
+import { CostomeBaseModule } from './costome_base/costome_base.module';
+import { PlayerProfilesModule } from './player_profiles/player_profiles.module';
+import { CacheService } from './cache/cache.service';
+import { CacheModule } from './cache/cache.module';
 import config from './common/configs/config';
 
 registerGraphQLEnums(config().graphql);
@@ -40,9 +43,11 @@ registerGraphQLEnums(config().graphql);
     }),
 
     AuthModule,
-    UsersModule,
     PostsModule,
-    RolesModule,
+    ObtainBaseModule,
+    CostomeBaseModule,
+    PlayerProfilesModule,
+    CacheModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, DateScalar],

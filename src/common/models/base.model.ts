@@ -1,4 +1,4 @@
-import { Field, ObjectType, ID } from '@nestjs/graphql';
+import { Field, ObjectType, ID, Directive  } from '@nestjs/graphql';
 
 @ObjectType({ isAbstract: true })
 export abstract class BaseModel {
@@ -12,18 +12,22 @@ export abstract class BaseModel {
   createdAt: Date;
 
   @Field(() => String, { nullable: true })
+  @Directive('@auth(rule: admin)')
   createdBy?: string;
 
   @Field(() => Date, { nullable: true })
   updatedAt?: Date;
 
   @Field(() => String, { nullable: true })
+  @Directive('@auth(rule: admin)')
   updatedBy?: string;
 
   @Field(() => Date, { nullable: true })
+  @Directive('@auth(rule: admin)')
   deletedAt?: Date;
 
   @Field(() => String, { nullable: true })
+  @Directive('@auth(rule: admin)')
   deletedBy?: string;
 
   @Field(() => String, { nullable: true })

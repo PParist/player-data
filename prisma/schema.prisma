@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -10,98 +10,108 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model PlayerProfile {
-  id                   Int                     @id
-  uuid                 String                  @unique
-  userAccountUuid      String                  @map("user_account_uuid")
-  name                 String                  @unique
-  description          String?
-  imageUrl             String?                 @map("image_url")
-  level                Int
-  exp                  Int
-  currentMana          Int                     @map("current_mana")
-  maxMana              Int                     @map("max_mana")
-  zeny                 Int
-  crystalShard         Int                     @map("crystal_shard")
-  goldenPoringCoin     Int                     @map("golden_poring_coin")
-  poringCoin           Int                     @map("poring_coin")
-  gachaponTicket       Int                     @map("gachapon_ticket")
-  createdAt            DateTime                @map("created_at")
-  createdBy            String                  @map("created_by")
-  updatedAt            DateTime                @map("updated_at")
-  updatedBy            String                  @map("updated_by")
-  deletedAt            DateTime?               @map("deleted_at")
-  deletedBy            String?                 @map("deleted_by")
-  version              Int
-  characterCustomizations CharacterCustomization[]
+model PlayerProfiles {
+  id                Int       @id @default(autoincrement())
+  uuid              String    @unique
+  userAccountUuid   String?   @map("user_account_uuid")
+  name              String    @unique
+  description       String?
+  imageUrl          String?   @map("image_url")
+  level             Int
+  exp               Int
+  currentMana       Int       @map("current_mana")
+  maxMana           Int       @map("max_mana")
+  zeny              Int
+  crystalShard      Int       @map("crystal_shard")
+  goldenPoringCoin  Int       @map("golden_poring_coin")
+  poringCoin        Int       @map("poring_coin")
+  gachaponTicket    Int       @map("gachapon_ticket")
+  createdAt         DateTime  @map("created_at")
+  createdBy         String    @map("created_by")
+  updatedAt         DateTime? @map("updated_at")
+  updatedBy         String?   @map("updated_by")
+  deletedAt         DateTime? @map("deleted_at")
+  deletedBy         String?   @map("deleted_by")
+  version           String
+
+  // Relations
+  costumes          Costumes[]
 
   @@map("player_profiles")
 }
 
-model CustomeBase {
-  id                   Int                     @id
-  uuid                 String                  @unique
-  equipmentId          String                  @unique @map("equipment_id")
-  name                 String
-  info                 String?
-  imageUrl             String?                 @map("image_url")
-  prefabUrl            String?                 @map("prefab_url")
-  model                Int
-  isDefault            Int                     @map("is_default")
-  isColorable          Int                     @map("is_colorable")
-  currentColor         String?                 @map("current_color")
-  colors               String?
-  equipType            Int                     @map("equip_type")
-  tier                 Int
-  createdAt            DateTime                @map("created_at")
-  createdBy            String                  @map("created_by")
-  updatedAt            DateTime                @map("updated_at")
-  updatedBy            String                  @map("updated_by")
-  deletedAt            DateTime?               @map("deleted_at")
-  deletedBy            String?                 @map("deleted_by")
-  version              Int
-  characterCustomizations CharacterCustomization[]
+model CostumeBases {
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique
+  equipmentId     String    @unique @map("equipment_id")
+  name            String
+  info            String?
+  obtainsBaseUuid String?   @map("obtains_base_uuid")
+  imagePath       String?   @map("image_path")
+  prefabPath      String?   @map("prefab_path")
+  equipType       Int       @map("equip_type")
+  model           Int
+  tier            Int
+  isActive        Int       @map("is_active")
+  isDefault       Int       @map("is_default")
+  isColorable     Int       @map("is_colorable")
+  colors          String?
+  createdAt       DateTime  @map("created_at")
+  createdBy       String    @map("created_by")
+  updatedAt       DateTime? @map("updated_at")
+  updatedBy       String?   @map("updated_by")
+  deletedAt       DateTime? @map("deleted_at")
+  deletedBy       String?   @map("deleted_by")
+  version         String
 
-  @@map("custome_bases")
+  // Relations
+  obtainBase      ObtainBases? @relation(fields: [obtainsBaseUuid], references: [uuid])
+  costumes        Costumes[]
+
+  @@map("costume_bases")
 }
 
-model CharacterCustomization {
-  id                   Int                     @id
-  uuid                 String                  @unique
-  playerUuid           String                  @map("player_uuid")
-  customeBaseUuid      String                  @map("custome_base_uuid")
-  obtainUuid           String                  @map("obtain_uuid")
-  obtainDate           DateTime                @map("obtain_date")
-  isFashion            Int                     @map("is_fashion")
-  isActive             Int                     @map("is_active")
-  isEquiped            Int                     @map("is_equiped")
-  createdAt            DateTime                @map("created_at")
-  createdBy            String                  @map("created_by")
-  updatedAt            DateTime                @map("updated_at")
-  updatedBy            String                  @map("updated_by")
-  deletedAt            DateTime?               @map("deleted_at")
-  deletedBy            String?                 @map("deleted_by")
-  version              Int
-  player               PlayerProfile           @relation(fields: [playerUuid], references: [uuid])
-  customeBase          CustomeBase             @relation(fields: [customeBaseUuid], references: [uuid])
-  obtainBase           ObtainBase              @relation(fields: [obtainUuid], references: [uuid])
+model Costumes {
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique
+  playerUuid      String    @map("player_uuid")
+  costumeBaseUuid String    @map("costume_base_uuid")
+  currentColor    String?   @map("current_color")
+  obtainDate      DateTime  @map("obtain_date")
+  isFashion       Int       @map("is_fashion")
+  isActive        Int       @map("is_active")
+  isEquipped      Int       @map("is_equipped")
+  createdAt       DateTime  @map("created_at")
+  createdBy       String    @map("created_by")
+  updatedAt       DateTime? @map("updated_at")
+  updatedBy       String?   @map("updated_by")
+  deletedAt       DateTime? @map("deleted_at")
+  deletedBy       String?   @map("deleted_by")
+  version         String
 
-  @@map("character_customizations")
+  // Relations
+  player          PlayerProfiles @relation(fields: [playerUuid], references: [uuid])
+  costumeBase     CostumeBases   @relation(fields: [costumeBaseUuid], references: [uuid])
+
+  @@map("costumes")
 }
 
-model ObtainBase {
-  id                   Int                     @id
-  uuid                 String                  @unique
-  obtainType           String                  @map("obtain_type")
-  typeUuid             String                  @map("type_uuid")
-  createdAt            DateTime                @map("created_at")
-  createdBy            String                  @map("created_by")
-  updatedAt            DateTime                @map("updated_at")
-  updatedBy            String                  @map("updated_by")
-  deletedAt            DateTime?               @map("deleted_at")
-  deletedBy            String?                 @map("deleted_by")
-  version              Int
-  characterCustomizations CharacterCustomization[]
+model ObtainBases {
+  id           Int       @id @default(autoincrement())
+  uuid         String    @unique
+  obtainsType  String?   @map("obtains_type")
+  typesUuid    String?   @map("types_uuid")
+  info         String?
+  createdAt    DateTime  @map("created_at")
+  createdBy    String    @map("created_by")
+  updatedAt    DateTime? @map("updated_at")
+  updatedBy    String?   @map("updated_by")
+  deletedAt    DateTime? @map("deleted_at")
+  deletedBy    String?   @map("deleted_by")
+  version      String
+
+  // Relations
+  costumeBases CostumeBases[]
 
   @@map("obtain_bases")
 }

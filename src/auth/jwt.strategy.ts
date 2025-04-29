@@ -2,7 +2,6 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserAccounts } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { JwtDto } from './dto/jwt.dto';
 
@@ -18,11 +17,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtDto): Promise<UserAccounts> {
-    const user = await this.authService.validateUser(payload.userUuid);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    return user;
-  }
+  // async validate(payload: JwtDto){
+  //   const user = await this.authService.validateUser(payload.userUuid);
+  //   if (!user) {
+  //     throw new UnauthorizedException();
+  //   }
+
+  //   if (user)
+
+  //   return user;
+  // }
 }

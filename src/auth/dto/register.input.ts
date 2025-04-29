@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
-import { LoginType } from '@prisma/client';
+
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
@@ -15,8 +15,8 @@ export class RegisterInput {
   @IsNotEmpty()
   login_token: string;
 
-  @Field(() => LoginType)
-  login_type: LoginType;
+  // @Field(() => LoginType)
+  // login_type: LoginType;
 
   @Field({ nullable: true })
   device_uuid?: string;

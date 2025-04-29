@@ -2,63 +2,280 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Auth {
-  """JWT access token"""
-  accessToken: JWT!
+type CostomeBase {
+  """Colors"""
+  colors: String
+  createdAt: Date
+  createdBy: String
+  deletedAt: Date
+  deletedBy: String
 
-  """JWT refresh token"""
-  refreshToken: JWT!
-  user_account: UserAccount!
+  """Equipment ID"""
+  equimentID: String!
+
+  """Equioment Type"""
+  equipmentType: Int!
+  id: ID!
+
+  """Image Path"""
+  imagePath: String
+
+  """Equipment Info"""
+  info: String
+
+  """Is Active"""
+  isActive: Int!
+
+  """Is Colorable"""
+  isColorable: Int!
+
+  """Is Default"""
+  isDefault: Int!
+
+  """Model"""
+  model: Int!
+
+  """Equipment Name"""
+  name: String
+
+  """Obtain Base Uuid"""
+  obtainBaseUuid: String
+
+  """Prefab Path"""
+  prefabPath: String
+
+  """Tier"""
+  tier: Int!
+  updatedAt: Date
+  updatedBy: String
+  uuid: String!
+  version: String
 }
 
-input CreateRoleInput {
-  description: String!
+input CreateCostomeBaseInput {
+  """Colors"""
+  colors: String
+
+  """Equipment ID"""
+  equimentID: String!
+
+  """Equioment Type"""
+  equipmentType: Int!
+
+  """Image Path"""
+  imagePath: String
+
+  """Equipment Info"""
+  info: String
+
+  """Is Active"""
+  isActive: Int!
+
+  """Is Colorable"""
+  isColorable: Int!
+
+  """Is Default"""
+  isDefault: Int!
+
+  """Model"""
+  model: Int!
+
+  """Equipment Name"""
+  name: String
+
+  """Obtain Base Uuid"""
+  obtainBaseUuid: String
+
+  """Prefab Path"""
+  prefabPath: String
+
+  """Tier"""
+  tier: Int!
+}
+
+input CreateObtainBaseInput {
+  """info"""
+  info: String
+
+  """obtains_type"""
+  obtains_type: String
+
+  """tpyes_uuid"""
+  types_uuid: String
+}
+
+input CreatePlayerProfileInput {
+  """Crystal shard currency"""
+  crystalShard: Int!
+
+  """Current mana points"""
+  currentMana: Int!
+
+  """Player profile description"""
+  description: String
+
+  """Player experience points"""
+  exp: Int!
+
+  """Gachapon tickets"""
+  gachaponTicket: Int!
+
+  """Golden poring coin currency"""
+  goldenPoringCoin: Int!
+
+  """URL to player profile image"""
+  imageUrl: String
+
+  """Player level"""
+  level: Int!
+
+  """Maximum mana points"""
+  maxMana: Int!
+
+  """Player profile name"""
   name: String!
-  uuid: String!
-  version: String!
+
+  """Poring coin currency"""
+  poringCoin: Int!
+
+  """User account UUID"""
+  userAccountUuid: String
+
+  """Player currency (Zeny)"""
+  zeny: Int!
 }
 
 """Date custom scalar type"""
 scalar Date
 
-"""
-A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
-"""
-scalar JWT
+type Mutation {
+  createCostomeBase(createCostomeBaseInput: CreateCostomeBaseInput!): CostomeBase!
+  createObtainBase(createObtainBaseInput: CreateObtainBaseInput!): ObtainBase!
+  createPlayerProfile(createPlayerProfileInput: CreatePlayerProfileInput!): PlayerProfile!
+  removeCostomeBase(uuid: String!): CostomeBase!
+  removeObtainBase(uuid: String!): ObtainBase!
+  removePlayerProfile(uuid: String!): PlayerProfile!
+  updateCostomeBase(updateCostomeBaseInput: UpdateCostomeBaseInput!): CostomeBase!
+  updateObtainBase(updateObtainBaseInput: UpdateObtainBaseInput!): ObtainBase!
+  updatePlayerProfile(updatePlayerProfileInput: UpdatePlayerProfileInput!): PlayerProfile!
+}
 
-input LoginInput {
-  device_uuid: String
-  email: String!
-  ip_address: String
-  login_token: String!
-  login_type: LoginType!
-  role: String
-  uuid: String
+type Name {
+  """Player profile name"""
+  name: String!
+}
+
+type ObtainBase {
+  createdAt: Date
+  createdBy: String
+  deletedAt: Date
+  deletedBy: String
+  id: ID!
+
+  """info"""
+  info: String
+
+  """obtains_type"""
+  obtains_type: String
+
+  """tpyes_uuid"""
+  types_uuid: String
+  updatedAt: Date
+  updatedBy: String
+  uuid: String!
   version: String
 }
 
-"""Types of login methods"""
-enum LoginType {
-  APPLE
-  FACEBOOK
-  GOOGLE
-  GUEST
-  HUAWEI
-  NONE
+"""
+Possible directions in which to order a list of items when provided an `orderBy` argument.
+"""
+enum OrderDirection {
+  asc
+  desc
 }
 
-type Mutation {
-  createRole(createRoleInput: CreateRoleInput!): Role!
-  login(data: LoginInput!): Auth!
-  refreshToken(token: JWT!): Token!
-  register(data: RegisterInput!): Auth!
-  removeRole(id: Int!): Role!
-  updateRole(updateRoleInput: UpdateRoleInput!): Role!
-  updateUser(data: UpdateUserInput!): UserAccount!
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type PaginatedPlayerProfiles {
+  data: [PlayerProfile!]!
+  meta: PaginationMeta!
+}
+
+type PaginationMeta {
+  limit: Int!
+  page: Int!
+  pages: Int!
+  total: Int!
+}
+
+type PlayerProfile {
+  createdAt: Date
+  createdBy: String
+
+  """Crystal shard currency"""
+  crystalShard: Int!
+
+  """Current mana points"""
+  currentMana: Int!
+  deletedAt: Date
+  deletedBy: String
+
+  """Player profile description"""
+  description: String
+
+  """Player experience points"""
+  exp: Int!
+
+  """Gachapon tickets"""
+  gachaponTicket: Int!
+
+  """Golden poring coin currency"""
+  goldenPoringCoin: Int!
+  id: ID!
+
+  """URL to player profile image"""
+  imageUrl: String
+
+  """Player level"""
+  level: Int!
+
+  """Maximum mana points"""
+  maxMana: Int!
+
+  """Player profile name"""
+  name: String!
+
+  """Poring coin currency"""
+  poringCoin: Int!
+  updatedAt: Date
+  updatedBy: String
+
+  """User account UUID"""
+  userAccountUuid: String
+  uuid: String!
+  version: String
+
+  """Player currency (Zeny)"""
+  zeny: Int!
+}
+
+type PlayerProfileConnection {
+  edges: [PlayerProfileEdge!]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PlayerProfileEdge {
+  cursor: String!
+  node: PlayerProfile!
 }
 
 type Post {
-  author: UserAccount
   content: String
   createdAt: Date
   createdBy: String
@@ -74,77 +291,114 @@ type Post {
 }
 
 type Query {
+  costomeBase(uuid: String!): CostomeBase!
   hello(name: String!): String!
   helloWorld: String!
-  myuser: UserAccount!
-  role(id: Int!): Role!
-  roles: [Role!]!
-  user(uuid: String!): UserAccount!
-}
-
-input RegisterInput {
-  description: String
-  device_uuid: String
-  email: String!
-  ip_address: String
-  login_token: String!
-  login_type: LoginType!
-  role_uuid: String
-  version: String!
-}
-
-type Role {
-  createdAt: Date
-  createdBy: String
-  deletedAt: Date
-  deletedBy: String
-  description: String!
-  id: ID!
-  name: String!
-  updatedAt: Date
-  updatedBy: String
-  uuid: String!
-  version: String
+  obtainBase(uuid: String!): ObtainBase!
+  obtainBases: [ObtainBase!]!
+  paginatedPlayerProfiles(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedPlayerProfiles!
+  playerProfile(uuid: String!): PlayerProfile!
+  playerProfiles(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedPlayerProfiles!
+  playerProfilesConnection(after: String, before: String, first: Int, last: Int, skip: Int): PlayerProfileConnection!
+  randomPlayerName: Name!
 }
 
 type Subscription {
   postCreated: Post!
 }
 
-type Token {
-  """JWT access token"""
-  accessToken: JWT!
+input UpdateCostomeBaseInput {
+  """Colors"""
+  colors: String
 
-  """JWT refresh token"""
-  refreshToken: JWT!
-}
+  """Equipment ID"""
+  equimentID: String
 
-input UpdateRoleInput {
-  description: String
-  id: Int!
+  """Equioment Type"""
+  equipmentType: Int
+
+  """Image Path"""
+  imagePath: String
+
+  """Equipment Info"""
+  info: String
+
+  """Is Active"""
+  isActive: Int
+
+  """Is Colorable"""
+  isColorable: Int
+
+  """Is Default"""
+  isDefault: Int
+
+  """Model"""
+  model: Int
+
+  """Equipment Name"""
   name: String
-  uuid: String
-  version: String
+
+  """Obtain Base Uuid"""
+  obtainBaseUuid: String
+
+  """Prefab Path"""
+  prefabPath: String
+
+  """Tier"""
+  tier: Int
+  uuid: String!
 }
 
-input UpdateUserInput {
+input UpdateObtainBaseInput {
+  """info"""
+  info: String
+
+  """obtains_type"""
+  obtains_type: String
+
+  """tpyes_uuid"""
+  types_uuid: String
+  uuid: String!
+}
+
+input UpdatePlayerProfileInput {
+  """Crystal shard currency"""
+  crystalShard: Int
+
+  """Current mana points"""
+  currentMana: Int
+
+  """Player profile description"""
   description: String
-  email: String
-  roleUuid: String
-}
 
-type UserAccount {
-  createdAt: Date
-  createdBy: String
-  deletedAt: Date
-  deletedBy: String
-  email: String!
-  id: Int
-  login_type: LoginType
-  role: Role!
-  role_uuid: String
-  updatedAt: Date
-  updatedBy: String
-  uuid: String
-  version: String
+  """Player experience points"""
+  exp: Int
+
+  """Gachapon tickets"""
+  gachaponTicket: Int
+
+  """Golden poring coin currency"""
+  goldenPoringCoin: Int
+
+  """URL to player profile image"""
+  imageUrl: String
+
+  """Player level"""
+  level: Int
+
+  """Maximum mana points"""
+  maxMana: Int
+
+  """Player profile name"""
+  name: String
+
+  """Poring coin currency"""
+  poringCoin: Int
+
+  """User account UUID"""
+  userAccountUuid: String
+  uuid: String!
+
+  """Player currency (Zeny)"""
+  zeny: Int
 }
