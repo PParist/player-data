@@ -1,66 +1,84 @@
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
 import { defaultFieldResolver, GraphQLSchema } from 'graphql';
-import { ForbiddenError } from 'apollo-server-express';
+import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
 
 export function authDirectiveTransformer(schema: GraphQLSchema): GraphQLSchema {
-
+  const jwtService = new JwtService({});
   const directiveName = 'auth';
   
   return mapSchema(schema, {
     [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
-      // ตรวจสอบว่า field นี้มี directive @auth หรือไม่
       const authDirective = getDirective(schema, fieldConfig, directiveName)?.[0];
-      
-      // ถ้าไม่มี directive ให้ return fieldConfig เดิม
+
       if (!authDirective) {
         return fieldConfig;
       }
       
-      // ดึงค่า rule จาก directive arguments
       const { rule } = authDirective;
       
-      // เก็บ resolver เดิมไว้
       const { resolve = defaultFieldResolver } = fieldConfig;
-      
-      // สร้าง resolver ใหม่ที่มีการตรวจสอบสิทธิ์
+
       fieldConfig.resolve = async function(source, args, context, info) {
         const request = context.req;
-        const user = request.user;
+        const authHeader = request.headers.authorization;
         
-        if (!user) {
-          throw new UnauthorizedException('Authentication required');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          throw new UnauthorizedException('Invalid token');
         }
         
-        if (rule && ['ADMIN', 'USER', 'GUEST'].includes(String(rule).toUpperCase())) {
+        const token = authHeader.substring(7);
+        
+        try {
+          const decodedToken = jwtService.decode(token);
+          
+          if (!decodedToken) {
+            throw new UnauthorizedException('Invalid token');
+          }
+          
+          
+          const role = decodedToken['role'] || 'user';
+          
+          const user = {
+            userUuid: decodedToken['userUuid'],
+            email: decodedToken['email'],
+            role: role
+          };
+          
+          request.user = user;
+        
+          if (rule && ['ADMIN', 'USER', 'GUEST'].includes(String(rule).toUpperCase())) {
             const ruleValue = String(rule).toLowerCase();
             
             switch (ruleValue) {
               case 'admin':
-                if (user.role !== 'admin') {
-                  throw new UnauthorizedException('Admin access required');
+                if (role !== 'admin') {
+                  return null;
                 }
                 break;
               case 'user':
-                if (user.role !== 'user' && user.role !== 'admin') {
-                  throw new UnauthorizedException('User access required');
+                if (role !== 'user' && role !== 'admin') {
+                  return null;
                 }
                 break;
               case 'guest':
-                if (source.ownerId !== user.userUuid && user.role !== 'admin') {
-                  throw new UnauthorizedException('Owner access required');
+                if (source.ownerId !== user.userUuid && role !== 'admin') {
+                  return null;
                 }
                 break;
             }
           } else {
-            // ถ้า rule ไม่ถูกต้อง
             throw new Error(`Invalid rule value: ${rule}`);
           }
           
           return resolve(source, args, context, info);
-        };
-        
-        return fieldConfig;
-      }
-    });
-  }
+        } catch (error) {
+          console.error('Error processing token:', error.message);
+          return null;
+        }
+      };
+      
+      return fieldConfig;
+    }
+  });
+}
