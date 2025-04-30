@@ -2,10 +2,10 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CachePort } from './port/cache.port';
 
 @Injectable()
-export class CacheService {
-  private readonly logger = new Logger(CacheService.name);
+export class LocalCacheService  {
+  private readonly logger = new Logger(LocalCacheService .name);
 
-  constructor(@Inject('CACHE_PORT') private readonly cachePort: CachePort) {}
+  constructor(@Inject('LOCAL_CACHE_PORT') private readonly cachePort: CachePort) {}
 
   /**
    * Get a value from cache

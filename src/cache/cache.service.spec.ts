@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CacheService } from './cache.service';
+import { LocalCacheService  } from './local-cache.service';
 
-describe('CacheService', () => {
-  let service: CacheService;
+describe('LocalCacheService ', () => {
+  let service: LocalCacheService ;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CacheService],
+      providers: [LocalCacheService ],
     }).compile();
 
-    service = module.get<CacheService>(CacheService);
+    service = module.get<LocalCacheService >(LocalCacheService );
   });
 
   it('should be defined', () => {

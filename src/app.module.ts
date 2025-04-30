@@ -15,7 +15,7 @@ import { registerGraphQLEnums } from './common/graphql/enums';
 import { ObtainBaseModule } from './obtain_base/obtain_base.module';
 import { CostomeBaseModule } from './costome_base/costome_base.module';
 import { PlayerProfilesModule } from './player_profiles/player_profiles.module';
-import { CacheService } from './cache/cache.service';
+import { LocalCacheService  } from './cache/local-cache.service';
 import { CacheModule } from './cache/cache.module';
 import config from './common/configs/config';
 

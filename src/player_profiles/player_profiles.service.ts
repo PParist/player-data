@@ -7,7 +7,8 @@ import { VERSION  } from '@common/constants/string';
 import { CACHE_KEYS ,CACHE_TTL  } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { generateSuperUniquePlayerName } from 'src/common/utils/random';
-import { CacheService } from '../cache/cache.service';
+import { LocalCacheService } from '../cache/local-cache.service';
+import { DistributedCacheService } from '../cache/distributed-cache.service';
 import { PaginationArgs } from '../common/pagination/pagination.args';
 import { OptionalPaginationArgs, PaginatedPlayerProfiles } from './player_profiles.resolver';
 
@@ -15,7 +16,8 @@ import { OptionalPaginationArgs, PaginatedPlayerProfiles } from './player_profil
 export class PlayerProfilesService {
   constructor(
     private prisma: PrismaService,
-    private cacheService: CacheService,
+    private localcacheService: LocalCacheService,
+    private distributedCacheService: DistributedCacheService
   ) {}
 
   async create(createPlayerProfileInput: CreatePlayerProfileInput) {
@@ -36,7 +38,8 @@ export class PlayerProfilesService {
       });
       
       // Clear cache for findAll because new data was added
-      await this.cacheService.delete('player_profiles:all');
+      await this.localcacheService.delete('player_profiles:all');
+      await this.distributedCacheService.delete('player_profiles:all');
       
       return playerProfile;
     } catch (error) {
@@ -48,7 +51,7 @@ export class PlayerProfilesService {
     try {
       // Try to fetch data from cache first
       const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:all`;
-      const cachedProfiles = await this.cacheService.get<any[]>(cacheKey);
+      const cachedProfiles = await this.localcacheService.get<any[]>(cacheKey);
       
       // If data exists in cache, return it immediately
       if (cachedProfiles) {
@@ -78,7 +81,7 @@ export class PlayerProfilesService {
       };
       
       // Store data in cache
-      await this.cacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
+      await this.localcacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
       console.log('Returning player profiles from database',profiles);
       return result;
     } catch (error) {
@@ -91,7 +94,7 @@ export class PlayerProfilesService {
       const { page = 1, limit = 100, orderBy = 'updatedAt', orderDirection = 'desc' } = options;
       
       const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:${page}:${limit}:${orderBy}:${orderDirection}`;
-      const cachedResult = await this.cacheService.get<PaginatedPlayerProfiles>(cacheKey);
+      const cachedResult = await this.localcacheService.get<PaginatedPlayerProfiles>(cacheKey);
       
       if (cachedResult) {
         console.log(`Returning player profiles with options from cache: ${cacheKey}`);
@@ -105,7 +108,6 @@ export class PlayerProfilesService {
       const profiles = await this.prisma.playerProfiles.findMany({
         skip,
         take: limit,
-        //select: this.selectFields,
         orderBy: orderOption,
         where: { deletedAt: null },
       });
@@ -124,7 +126,7 @@ export class PlayerProfilesService {
         }
       };
       
-      await this.cacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
+      await this.localcacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
       return result;
 
     } catch (error) {
@@ -137,7 +139,7 @@ export class PlayerProfilesService {
   async findAllConnection(args: PaginationArgs) {
     try {
       const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:connection:${JSON.stringify(args)}`;
-      const cachedResult = await this.cacheService.get(cacheKey);
+      const cachedResult = await this.localcacheService.get(cacheKey);
       
       if (cachedResult) {
         console.log('Returning player profiles connection from cache');
@@ -275,7 +277,7 @@ export class PlayerProfilesService {
       };
       
       // เก็บผลลัพธ์ในแคช
-      await this.cacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
+      await this.localcacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
       
       return result;
     } catch (error) {
@@ -289,7 +291,7 @@ export class PlayerProfilesService {
       const cacheKey = `player_profile:${uuid}`;
       
       // Try to fetch data from cache first
-      const cachedProfile = await this.cacheService.get(cacheKey);
+      const cachedProfile = await this.localcacheService.get(cacheKey);
       
       // If data exists in cache, return it immediately
       if (cachedProfile) {
@@ -307,7 +309,7 @@ export class PlayerProfilesService {
       }
       
       // Store data in cache (TTL 10 minutes)
-      await this.cacheService.set(cacheKey, playerProfile, 600);
+      await this.localcacheService.set(cacheKey, playerProfile, 600);
       
       return playerProfile;
     } catch (error) {
@@ -331,10 +333,10 @@ export class PlayerProfilesService {
       
       // Update cache for this profile
       const cacheKey = `player_profile:${uuid}`;
-      await this.cacheService.set(cacheKey, updatedProfile, 600);
+      await this.localcacheService.set(cacheKey, updatedProfile, 600);
       
       // Clear cache for findAll because data was updated
-      await this.cacheService.delete('player_profiles:all');
+      await this.localcacheService.delete('player_profiles:all');
       
       return updatedProfile;
     } catch (error) {
@@ -349,10 +351,10 @@ export class PlayerProfilesService {
       });
       
       // Delete cache for this profile
-      await this.cacheService.delete(`player_profile:${uuid}`);
+      await this.localcacheService.delete(`player_profile:${uuid}`);
       
       // Clear cache for findAll because data was deleted
-      await this.cacheService.delete('player_profiles:all');
+      await this.localcacheService.delete('player_profiles:all');
       
       return deletedProfile;
     } catch (error) {

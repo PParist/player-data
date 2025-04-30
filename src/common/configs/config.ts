@@ -28,6 +28,15 @@ const config: Config = {
     refreshIn: '7d',
     bcryptSaltOrRound: 10,
   },
+  redis: {
+    host: 'localhost',
+    port: 6379,
+    password: undefined,
+    username: undefined,
+    db: 0,
+    tls: false,
+    retryStrategy: (times) => Math.min(times * 50, 2000),
+  },
 };
 
 export default (): Config => config;

@@ -10,3 +10,9 @@ export const CACHE_KEYS = {
     PROFILE: (uuid: string) => `player_profile:${uuid}`,
     PROFILES_LIST: 'player_profiles:list',
   };
+
+export const PERFIX = {
+    ALL_PROFILES: 'player_profiles:all',
+    PROFILE: (uuid: string) => `player_profile:${uuid}`,
+    PROFILES_LIST: 'player_profiles:list',
+  };
