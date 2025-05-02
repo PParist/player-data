@@ -3,8 +3,10 @@ import { IsUUID } from 'class-validator';
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateCostomeBaseInput extends PartialType(CreateCostomeBaseInput) {
+export class UpdateCostomeBaseInput extends PartialType(
+  CreateCostomeBaseInput,
+) {
   @Field(() => String)
   @IsUUID()
-  uuid: string
+  uuid: string;
 }

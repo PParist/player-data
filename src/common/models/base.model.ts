@@ -1,4 +1,4 @@
-import { Field, ObjectType, ID, Directive  } from '@nestjs/graphql';
+import { Field, ObjectType, ID, Directive } from '@nestjs/graphql';
 
 @ObjectType({ isAbstract: true })
 export abstract class BaseModel {

@@ -1,24 +1,24 @@
 // src/cache/cache.module.ts
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import { Module, DynamicModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { InMemoryCacheAdapter } from './adapter/in-memory-cache.adapter';
 import { RedisCacheAdapter } from './adapter/redis-cache.adapter';
 import { LocalCacheService } from './local-cache.service';
 import { DistributedCacheService } from './distributed-cache.service';
 import { RedisModule } from './redish.module';
 import { ConfigModule } from '@nestjs/config';
+import { CacheLayerService } from './cache-layer.service';
 
 @Module({
   imports: [
     ConfigModule,
     NestCacheModule.register({
       ttl: 60 * 1000,
-      max: 100,
+      max: 1000,
     }),
-    RedisModule.registerAsync(), // ลงทะเบียน Redis ทุกครั้ง
+    RedisModule.registerAsync(),
   ],
   providers: [
-    // Local cache providers
     InMemoryCacheAdapter,
     {
       provide: 'LOCAL_CACHE_PORT',
@@ -29,8 +29,7 @@ import { ConfigModule } from '@nestjs/config';
       inject: ['LOCAL_CACHE_PORT'],
       useFactory: (localCachePort) => new LocalCacheService(localCachePort),
     },
-    
-    // Distributed cache providers - จัดให้สร้างทุกครั้งไม่ต้องมีเงื่อนไข
+
     {
       provide: 'REDIS_ADAPTER',
       inject: ['REDIS_CLIENT'],
@@ -43,9 +42,11 @@ import { ConfigModule } from '@nestjs/config';
     {
       provide: DistributedCacheService,
       inject: ['DISTRIBUTED_CACHE_PORT'],
-      useFactory: (distributedCachePort) => new DistributedCacheService(distributedCachePort),
-    }
+      useFactory: (distributedCachePort) =>
+        new DistributedCacheService(distributedCachePort),
+    },
+    CacheLayerService,
   ],
-  exports: [LocalCacheService, DistributedCacheService], // ส่งออก services ทั้งสองประเภทเสมอ
+  exports: [LocalCacheService, DistributedCacheService, CacheLayerService],
 })
 export class CacheModule {}

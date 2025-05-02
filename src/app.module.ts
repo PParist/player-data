@@ -15,8 +15,8 @@ import { registerGraphQLEnums } from './common/graphql/enums';
 import { ObtainBaseModule } from './obtain_base/obtain_base.module';
 import { CostomeBaseModule } from './costome_base/costome_base.module';
 import { PlayerProfilesModule } from './player_profiles/player_profiles.module';
-import { LocalCacheService  } from './cache/local-cache.service';
 import { CacheModule } from './cache/cache.module';
+import { MessageQueueModule } from './message_queue/message_queue.module';
 import config from './common/configs/config';
 
 registerGraphQLEnums(config().graphql);
@@ -48,6 +48,7 @@ registerGraphQLEnums(config().graphql);
     CostomeBaseModule,
     PlayerProfilesModule,
     CacheModule,
+    MessageQueueModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, DateScalar],

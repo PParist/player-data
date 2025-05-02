@@ -194,13 +194,6 @@ enum OrderDirection {
   desc
 }
 
-type PageInfo {
-  endCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-}
-
 type PaginatedPlayerProfiles {
   data: [PlayerProfile!]!
   meta: PaginationMeta!
@@ -264,17 +257,6 @@ type PlayerProfile {
   zeny: Int!
 }
 
-type PlayerProfileConnection {
-  edges: [PlayerProfileEdge!]
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type PlayerProfileEdge {
-  cursor: String!
-  node: PlayerProfile!
-}
-
 type Post {
   content: String
   createdAt: Date
@@ -299,7 +281,6 @@ type Query {
   paginatedPlayerProfiles(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedPlayerProfiles!
   playerProfile(uuid: String!): PlayerProfile!
   playerProfiles(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedPlayerProfiles!
-  playerProfilesConnection(after: String, before: String, first: Int, last: Int, skip: Int): PlayerProfileConnection!
   randomPlayerName: Name!
 }
 

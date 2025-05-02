@@ -3,14 +3,16 @@ import { PrismaService } from 'nestjs-prisma';
 import { CreateObtainBaseInput } from './dto/create-obtain_base.input';
 import { UpdateObtainBaseInput } from './dto/update-obtain_base.input';
 import { VERSION } from '@common/constants/string';
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 
 @Injectable()
 export class ObtainBaseService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async create(createObtainBaseInput: CreateObtainBaseInput) {
     try {
@@ -26,10 +28,14 @@ export class ObtainBaseService {
           deletedAt: null,
           deletedBy: null,
           version: VERSION,
-        },   
+        },
       });
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, 'create obtain base', 'obtainBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        'create obtain base',
+        'obtainBase',
+      );
     }
   }
 
@@ -37,7 +43,11 @@ export class ObtainBaseService {
     try {
       return await this.prisma.obtainBases.findMany();
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, 'find all obtain bases', 'obtainBases');
+      DatabaseErrorHandler.handleError(
+        error,
+        'find all obtain bases',
+        'obtainBases',
+      );
     }
   }
 
@@ -54,7 +64,11 @@ export class ObtainBaseService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      DatabaseErrorHandler.handleError(error, `find obtain base with uuid ${uuid}`, 'obtainBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        `find obtain base with uuid ${uuid}`,
+        'obtainBase',
+      );
     }
   }
 
@@ -69,7 +83,11 @@ export class ObtainBaseService {
         },
       });
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, `update obtain base with uuid ${uuid}`, 'obtainBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        `update obtain base with uuid ${uuid}`,
+        'obtainBase',
+      );
     }
   }
 
@@ -79,7 +97,11 @@ export class ObtainBaseService {
         where: { uuid },
       });
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, `remove obtain base with uuid ${uuid}`, 'obtainBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        `remove obtain base with uuid ${uuid}`,
+        'obtainBase',
+      );
     }
   }
 }

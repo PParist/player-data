@@ -9,7 +9,9 @@ export class ObtainBaseResolver {
   constructor(private readonly obtainBaseService: ObtainBaseService) {}
 
   @Mutation(() => ObtainBase)
-  createObtainBase(@Args('createObtainBaseInput') createObtainBaseInput: CreateObtainBaseInput) {
+  createObtainBase(
+    @Args('createObtainBaseInput') createObtainBaseInput: CreateObtainBaseInput,
+  ) {
     return this.obtainBaseService.create(createObtainBaseInput);
   }
 
@@ -24,8 +26,13 @@ export class ObtainBaseResolver {
   }
 
   @Mutation(() => ObtainBase)
-  updateObtainBase(@Args('updateObtainBaseInput') updateObtainBaseInput: UpdateObtainBaseInput) {
-    return this.obtainBaseService.update(updateObtainBaseInput.uuid, updateObtainBaseInput);
+  updateObtainBase(
+    @Args('updateObtainBaseInput') updateObtainBaseInput: UpdateObtainBaseInput,
+  ) {
+    return this.obtainBaseService.update(
+      updateObtainBaseInput.uuid,
+      updateObtainBaseInput,
+    );
   }
 
   @Mutation(() => ObtainBase)

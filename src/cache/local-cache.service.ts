@@ -2,10 +2,12 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CachePort } from './port/cache.port';
 
 @Injectable()
-export class LocalCacheService  {
-  private readonly logger = new Logger(LocalCacheService .name);
+export class LocalCacheService {
+  private readonly logger = new Logger(LocalCacheService.name);
 
-  constructor(@Inject('LOCAL_CACHE_PORT') private readonly cachePort: CachePort) {}
+  constructor(
+    @Inject('LOCAL_CACHE_PORT') private readonly cachePort: CachePort,
+  ) {}
 
   /**
    * Get a value from cache
@@ -67,7 +69,7 @@ export class LocalCacheService  {
    */
   async mget<T>(keys: string[]): Promise<Record<string, T>> {
     if (!keys.length) return {};
-    
+
     if (this.cachePort.mget) {
       try {
         return await this.cachePort.mget<T>(keys);
@@ -75,19 +77,19 @@ export class LocalCacheService  {
         this.logger.warn(`Error multi-getting cache keys: ${error.message}`);
       }
     }
-    
+
     // Fallback to individual gets if mget not implemented
     const result: Record<string, T> = {};
-    
+
     await Promise.all(
       keys.map(async (key) => {
         const value = await this.get<T>(key);
         if (value !== null) {
           result[key] = value;
         }
-      })
+      }),
     );
-    
+
     return result;
   }
 
@@ -96,7 +98,7 @@ export class LocalCacheService  {
    * @param entries Object with key-value pairs to cache
    * @param ttl Time to live in seconds (optional)
    */
-  async mset<T>(entries: Record<string, T>, ttl?: number): Promise<void> {    
+  async mset<T>(entries: Record<string, T>, ttl?: number): Promise<void> {
     if (this.cachePort.mset) {
       try {
         await this.cachePort.mset<T>(entries, ttl);
@@ -105,12 +107,10 @@ export class LocalCacheService  {
         this.logger.warn(`Error multi-setting cache keys: ${error.message}`);
       }
     }
-    
+
     // Fallback to individual sets if mset not implemented
     await Promise.all(
-      Object.entries(entries).map(([key, value]) => 
-        this.set(key, value, ttl)
-      )
+      Object.entries(entries).map(([key, value]) => this.set(key, value, ttl)),
     );
   }
 
@@ -120,7 +120,7 @@ export class LocalCacheService  {
    */
   async mdelete(keys: string[]): Promise<void> {
     if (!keys.length) return;
-    
+
     if (this.cachePort.mdelete) {
       try {
         await this.cachePort.mdelete(keys);
@@ -129,9 +129,9 @@ export class LocalCacheService  {
         this.logger.warn(`Error multi-deleting cache keys: ${error.message}`);
       }
     }
-    
+
     // Fallback to individual deletes if mdelete not implemented
-    await Promise.all(keys.map(key => this.delete(key)));
+    await Promise.all(keys.map((key) => this.delete(key)));
   }
 
   /**
@@ -144,10 +144,12 @@ export class LocalCacheService  {
       try {
         return await this.cachePort.exists(key);
       } catch (error) {
-        this.logger.warn(`Error checking if key ${key} exists: ${error.message}`);
+        this.logger.warn(
+          `Error checking if key ${key} exists: ${error.message}`,
+        );
       }
     }
-    
+
     // Fallback if exists not implemented
     const value = await this.get(key);
     return value !== null;
@@ -162,10 +164,14 @@ export class LocalCacheService  {
       try {
         await this.cachePort.deletePattern(pattern);
       } catch (error) {
-        this.logger.warn(`Error deleting cache keys by pattern ${pattern}: ${error.message}`);
+        this.logger.warn(
+          `Error deleting cache keys by pattern ${pattern}: ${error.message}`,
+        );
       }
     } else {
-      this.logger.debug(`DeletePattern not supported by current cache implementation`);
+      this.logger.debug(
+        `DeletePattern not supported by current cache implementation`,
+      );
     }
   }
 
@@ -177,24 +183,24 @@ export class LocalCacheService  {
    * @returns Cached value or newly generated value
    */
   async getOrSet<T>(
-    key: string, 
-    factory: () => Promise<T>, 
-    ttl?: number
+    key: string,
+    factory: () => Promise<T>,
+    ttl?: number,
   ): Promise<T> {
     try {
       // Try to get from cache first
       const cachedValue = await this.get<T>(key);
-      
+
       if (cachedValue !== null) {
         return cachedValue;
       }
-      
+
       // If not in cache, generate value
       const newValue = await factory();
-      
+
       // Store in cache
       await this.set(key, newValue, ttl);
-      
+
       return newValue;
     } catch (error) {
       this.logger.warn(`Error in getOrSet for key ${key}: ${error.message}`);
@@ -214,10 +220,14 @@ export class LocalCacheService  {
       try {
         return await this.cachePort.increment(key, value);
       } catch (error) {
-        this.logger.warn(`Error incrementing cache key ${key}: ${error.message}`);
+        this.logger.warn(
+          `Error incrementing cache key ${key}: ${error.message}`,
+        );
       }
     } else {
-      this.logger.debug(`Increment not supported by current cache implementation`);
+      this.logger.debug(
+        `Increment not supported by current cache implementation`,
+      );
     }
     return null;
   }
@@ -233,10 +243,14 @@ export class LocalCacheService  {
       try {
         return await this.cachePort.decrement(key, value);
       } catch (error) {
-        this.logger.warn(`Error decrementing cache key ${key}: ${error.message}`);
+        this.logger.warn(
+          `Error decrementing cache key ${key}: ${error.message}`,
+        );
       }
     } else {
-      this.logger.debug(`Decrement not supported by current cache implementation`);
+      this.logger.debug(
+        `Decrement not supported by current cache implementation`,
+      );
     }
     return null;
   }
@@ -252,7 +266,9 @@ export class LocalCacheService  {
       try {
         return await this.cachePort.expire(key, ttl);
       } catch (error) {
-        this.logger.warn(`Error setting TTL for cache key ${key}: ${error.message}`);
+        this.logger.warn(
+          `Error setting TTL for cache key ${key}: ${error.message}`,
+        );
       }
     } else {
       this.logger.debug(`Expire not supported by current cache implementation`);

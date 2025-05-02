@@ -4,7 +4,7 @@ export enum Rule {
   ADMIN = 'admin',
   USER = 'user',
   GUEST = 'guest',
-  IS_OWNER = 'isOwner'
+  IS_OWNER = 'isOwner',
 }
 
 export function registerGraphQLEnums(config?: GraphqlConfig) {

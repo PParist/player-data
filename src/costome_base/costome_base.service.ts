@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateCostomeBaseInput } from './dto/create-costome_base.input';
@@ -8,9 +12,7 @@ import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 
 @Injectable()
 export class CostomeBaseService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async create(createCostomeBaseInput: CreateCostomeBaseInput) {
     try {
@@ -27,11 +29,15 @@ export class CostomeBaseService {
           deletedBy: null,
           version: VERSION,
           equipmentId: createCostomeBaseInput.equimentID,
-          equipType: createCostomeBaseInput.equipmentType, 
+          equipType: createCostomeBaseInput.equipmentType,
         },
       });
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, 'create costome base', 'costomeBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        'create costome base',
+        'costomeBase',
+      );
     }
   }
 
@@ -39,7 +45,11 @@ export class CostomeBaseService {
     try {
       return await this.prisma.costumeBases.findMany();
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, 'find all costome bases', 'costomeBases');
+      DatabaseErrorHandler.handleError(
+        error,
+        'find all costome bases',
+        'costomeBases',
+      );
     }
   }
 
@@ -56,7 +66,11 @@ export class CostomeBaseService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      DatabaseErrorHandler.handleError(error, `find costome base with uuid ${uuid}`, 'costomeBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        `find costome base with uuid ${uuid}`,
+        'costomeBase',
+      );
     }
   }
 
@@ -71,7 +85,11 @@ export class CostomeBaseService {
         },
       });
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, `update costome base with uuid ${uuid}`, 'costomeBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        `update costome base with uuid ${uuid}`,
+        'costomeBase',
+      );
     }
   }
 
@@ -81,7 +99,11 @@ export class CostomeBaseService {
         where: { uuid },
       });
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, `remove costome base with uuid ${uuid}`, 'costomeBase');
+      DatabaseErrorHandler.handleError(
+        error,
+        `remove costome base with uuid ${uuid}`,
+        'costomeBase',
+      );
     }
   }
 }

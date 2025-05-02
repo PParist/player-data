@@ -9,7 +9,10 @@ export class CostomeBaseResolver {
   constructor(private readonly costomeBaseService: CostomeBaseService) {}
 
   @Mutation(() => CostomeBase)
-  createCostomeBase(@Args('createCostomeBaseInput') createCostomeBaseInput: CreateCostomeBaseInput) {
+  createCostomeBase(
+    @Args('createCostomeBaseInput')
+    createCostomeBaseInput: CreateCostomeBaseInput,
+  ) {
     return this.costomeBaseService.create(createCostomeBaseInput);
   }
 
@@ -24,8 +27,14 @@ export class CostomeBaseResolver {
   }
 
   @Mutation(() => CostomeBase)
-  updateCostomeBase(@Args('updateCostomeBaseInput') updateCostomeBaseInput: UpdateCostomeBaseInput) {
-    return this.costomeBaseService.update(updateCostomeBaseInput.uuid, updateCostomeBaseInput);
+  updateCostomeBase(
+    @Args('updateCostomeBaseInput')
+    updateCostomeBaseInput: UpdateCostomeBaseInput,
+  ) {
+    return this.costomeBaseService.update(
+      updateCostomeBaseInput.uuid,
+      updateCostomeBaseInput,
+    );
   }
 
   @Mutation(() => CostomeBase)

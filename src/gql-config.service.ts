@@ -10,7 +10,8 @@ import { addDirectiveDefinitionsToSchema } from 'src/common/utils/schema.utils';
 export class GqlConfigService implements GqlOptionsFactory {
   constructor(private configService: ConfigService) {}
   createGqlOptions(): ApolloDriverConfig {
-    const graphqlConfig = this.configService.get<GraphqlConfig>('graphql');
+    const graphqlConfig =
+      this.configService.get<GraphqlConfig>('config.graphql');
     return {
       // schema options
       autoSchemaFile: graphqlConfig.schemaDestination || './src/schema.graphql',
@@ -24,16 +25,19 @@ export class GqlConfigService implements GqlOptionsFactory {
       playground: graphqlConfig.playgroundEnabled,
       context: ({ req }) => ({ req }),
       transformSchema: (schema) => {
-        schema = addDirectiveDefinitionsToSchema(schema, `
+        schema = addDirectiveDefinitionsToSchema(
+          schema,
+          `
           enum Rule {
             ADMIN
             USER
             GUEST
           }
           directive @auth(rule: String!) on FIELD_DEFINITION
-        `);
+        `,
+        );
         schema = authDirectiveTransformer(schema);
-        
+
         return schema;
       },
     };

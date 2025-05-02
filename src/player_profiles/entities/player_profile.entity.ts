@@ -9,10 +9,16 @@ export class PlayerProfile extends BaseModel {
   @Field(() => String, { description: 'Player profile name' })
   name: string;
 
-  @Field(() => String, { nullable: true, description: 'Player profile description' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Player profile description',
+  })
   description?: string;
 
-  @Field(() => String, { nullable: true, description: 'URL to player profile image' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'URL to player profile image',
+  })
   imageUrl?: string;
 
   @Field(() => Int, { description: 'Player level' })

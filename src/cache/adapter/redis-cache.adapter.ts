@@ -7,9 +7,7 @@ export class RedisCacheAdapter implements CachePort {
   private readonly logger = new Logger(RedisCacheAdapter.name);
   private readonly client: Redis.Redis;
 
-  constructor(
-    @Inject('REDIS_CLIENT') redisClient: Redis.Redis,
-  ) {
+  constructor(@Inject('REDIS_CLIENT') redisClient: Redis.Redis) {
     this.client = redisClient;
   }
 
@@ -112,7 +110,9 @@ export class RedisCacheAdapter implements CachePort {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      this.logger.error(`Error checking if key ${key} exists: ${error.message}`);
+      this.logger.error(
+        `Error checking if key ${key} exists: ${error.message}`,
+      );
       return false;
     }
   }
@@ -127,16 +127,18 @@ export class RedisCacheAdapter implements CachePort {
           'MATCH',
           pattern,
           'COUNT',
-          100
+          100,
         );
         cursor = nextCursor;
-        
+
         if (keys.length) {
           await this.client.del(...keys);
         }
       } while (cursor !== '0');
     } catch (error) {
-      this.logger.error(`Error deleting keys by pattern ${pattern}: ${error.message}`);
+      this.logger.error(
+        `Error deleting keys by pattern ${pattern}: ${error.message}`,
+      );
     }
   }
 

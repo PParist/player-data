@@ -3,22 +3,38 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from 'nestjs-prisma';
 import { CreatePlayerProfileInput } from './dto/create-player_profile.input';
 import { UpdatePlayerProfileInput } from './dto/update-player_profile.input';
-import { VERSION  } from '@common/constants/string';
-import { CACHE_KEYS ,CACHE_TTL  } from '@common/constants/cache';
+import { VERSION } from '@common/constants/string';
+import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { generateSuperUniquePlayerName } from 'src/common/utils/random';
-import { LocalCacheService } from '../cache/local-cache.service';
-import { DistributedCacheService } from '../cache/distributed-cache.service';
-import { PaginationArgs } from '../common/pagination/pagination.args';
-import { OptionalPaginationArgs, PaginatedPlayerProfiles } from './player_profiles.resolver';
+import { CacheLayerService } from '../cache/cache-layer.service';
+import {
+  OptionalPaginationArgs,
+  PaginatedPlayerProfiles,
+} from './player_profiles.resolver';
 
 @Injectable()
 export class PlayerProfilesService {
   constructor(
     private prisma: PrismaService,
-    private localcacheService: LocalCacheService,
-    private distributedCacheService: DistributedCacheService
+    private cacheService: CacheLayerService,
   ) {}
+
+  private getProfileCacheKey(uuid: string): string {
+    return `player_profile:${uuid}`;
+  }
+
+  private getListCacheKey(options?: OptionalPaginationArgs): string {
+    if (!options) return 'player_profiles:all';
+
+    const {
+      page = 1,
+      limit = 100,
+      orderBy = 'updatedAt',
+      orderDirection = 'desc',
+    } = options;
+    return `player_profiles:${page}:${limit}:${orderBy}:${orderDirection}`;
+  }
 
   async create(createPlayerProfileInput: CreatePlayerProfileInput) {
     try {
@@ -36,291 +52,211 @@ export class PlayerProfilesService {
           version: VERSION,
         },
       });
-      
-      // Clear cache for findAll because new data was added
-      await this.localcacheService.delete('player_profiles:all');
-      await this.distributedCacheService.delete('player_profiles:all');
-      
+
+      await this.cacheService.invalidatePattern('player_profiles:*');
+
       return playerProfile;
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, 'create player profile', 'playerProfile');
+      DatabaseErrorHandler.handleError(
+        error,
+        'create player profile',
+        'playerProfile',
+      );
     }
   }
 
   async findAll() {
     try {
-      // Try to fetch data from cache first
       const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:all`;
-      const cachedProfiles = await this.localcacheService.get<any[]>(cacheKey);
-      
-      // If data exists in cache, return it immediately
-      if (cachedProfiles) {
-        console.log('Returning player profiles from cache',cachedProfiles);
-        return cachedProfiles;
-      }
-      
-      // If not in cache, fetch from database with pagination and selected fields
-      const profiles = await this.prisma.playerProfiles.findMany({
-        where: { deletedAt: null },
-        orderBy: { updatedAt: 'desc' },
-      });
-      
-      // Get total count for pagination metadata
-      const totalCount = await this.prisma.playerProfiles.count({
-        where: { deletedAt: null },
-      });
-      
-      const result = {
-        data: profiles,
-        meta: {
-          total: totalCount,
-          page: 1,
-          limit: totalCount,
-          pages: 1,
-        }
-      };
-      
-      // Store data in cache
-      await this.localcacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
-      console.log('Returning player profiles from database',profiles);
-      return result;
-    } catch (error) {
-      DatabaseErrorHandler.handleError(error, 'find all player profiles', 'playerProfiles');
-    }
-  }
-
-   async findAllWithOptions(options: OptionalPaginationArgs): Promise<PaginatedPlayerProfiles> {
-    try {
-      const { page = 1, limit = 100, orderBy = 'updatedAt', orderDirection = 'desc' } = options;
-      
-      const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:${page}:${limit}:${orderBy}:${orderDirection}`;
-      const cachedResult = await this.localcacheService.get<PaginatedPlayerProfiles>(cacheKey);
-      
-      if (cachedResult) {
-        console.log(`Returning player profiles with options from cache: ${cacheKey}`);
-        return cachedResult;
-      }
-      
-      const skip = (page - 1) * limit;
-      const orderOption = {};
-      orderOption[orderBy] = orderDirection;
-      
-      const profiles = await this.prisma.playerProfiles.findMany({
-        skip,
-        take: limit,
-        orderBy: orderOption,
-        where: { deletedAt: null },
-      });
-      
-      const totalCount = await this.prisma.playerProfiles.count({
-        where: { deletedAt: null },
-      });
-      
-      const result = {
-        data: profiles,
-        meta: {
-          total: totalCount,
-          page,
-          limit,
-          pages: Math.ceil(totalCount / limit),
-        }
-      };
-      
-      await this.localcacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
-      return result;
-
-    } catch (error) {
-      console.error('Error in findAllWithOptions:', error);
-      DatabaseErrorHandler.handleError(error, 'find player profiles with options', 'playerProfiles');
-    }
-  }
-
-
-  async findAllConnection(args: PaginationArgs) {
-    try {
-      const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:connection:${JSON.stringify(args)}`;
-      const cachedResult = await this.localcacheService.get(cacheKey);
-      
-      if (cachedResult) {
-        console.log('Returning player profiles connection from cache');
-        return cachedResult;
-      }
-      
-      // ประมวลผลพารามิเตอร์การแบ่งหน้า
-      let { first, last, before, after, skip = 0 } = args;
-      
-      // กำหนดค่าเริ่มต้น
-      if (!first && !last) {
-        first = 10;
-      }
-      
-      // สร้างเงื่อนไขการค้นหา
-      const where = { deletedAt: null };
-      let take = first || last || 10;
-      
-      // ตรวจสอบและประมวลผล after cursor
-      if (after) {
-        const decodedCursor = Buffer.from(after, 'base64').toString('utf8');
-        const cursorUuid = decodedCursor.replace('cursor:', '');
-        
-        const cursorItem = await this.prisma.playerProfiles.findUnique({
-          where: { uuid: cursorUuid },
-        });
-        
-        if (cursorItem) {
-          where['updatedAt'] = {
-            lt: cursorItem.updatedAt,
-          };
-        }
-      }
-      
-      // ตรวจสอบและประมวลผล before cursor
-      if (before) {
-        const decodedCursor = Buffer.from(before, 'base64').toString('utf8');
-        const cursorUuid = decodedCursor.replace('cursor:', '');
-        
-        const cursorItem = await this.prisma.playerProfiles.findUnique({
-          where: { uuid: cursorUuid },
-        });
-        
-        if (cursorItem) {
-          where['updatedAt'] = {
-            gt: cursorItem.updatedAt,
-          };
-        }
-      }
-      
-      // ถ้าใช้ last ให้ดึงข้อมูลย้อนกลับ
-      if (last) {
-        take = -last;
-      }
-      
-      // ดึงข้อมูลจากฐานข้อมูล
-      const items = await this.prisma.playerProfiles.findMany({
-        take,
-        skip,
-        where,
-        orderBy: { updatedAt: 'desc' },
-        //select: this.selectFields,
-      });
-      
-      // นับจำนวนทั้งหมด
-      const totalCount = await this.prisma.playerProfiles.count({
-        where: { deletedAt: null },
-      });
-      
-      // สร้าง edges
-      const edges = items.map((item) => ({
-        cursor: Buffer.from(`cursor:${item.uuid}`).toString('base64'),
-        node: item,
-      }));
-      
-      // สร้าง pageInfo
-      const startCursor = edges.length > 0 ? edges[0].cursor : null;
-      const endCursor = edges.length > 0 ? edges[edges.length - 1].cursor : null;
-      
-      let hasNextPage = false;
-      let hasPreviousPage = false;
-      
-      if (first) {
-        hasNextPage = items.length === first;
-        
-        if (hasNextPage) {
-          // ตรวจสอบว่ามีรายการถัดไปหรือไม่
-          const nextItem = await this.prisma.playerProfiles.findFirst({
-            where: {
-              deletedAt: null,
-              ...(items.length > 0 ? {
-                updatedAt: {
-                  lt: items[items.length - 1].updatedAt,
-                },
-              } : {}),
-            },
+      return this.cacheService.get<PaginatedPlayerProfiles>(
+        cacheKey,
+        async () => {
+          const profiles = await this.prisma.playerProfiles.findMany({
+            where: { deletedAt: null },
             orderBy: { updatedAt: 'desc' },
           });
-          
-          hasNextPage = !!nextItem;
-        }
-      }
-      
-      if (last) {
-        hasPreviousPage = items.length === last;
-        
-        if (hasPreviousPage) {
-          // ตรวจสอบว่ามีรายการก่อนหน้าหรือไม่
-          const prevItem = await this.prisma.playerProfiles.findFirst({
-            where: {
-              deletedAt: null,
-              ...(items.length > 0 ? {
-                updatedAt: {
-                  gt: items[0].updatedAt,
-                },
-              } : {}),
-            },
-            orderBy: { updatedAt: 'asc' },
+
+          const totalCount = await this.prisma.playerProfiles.count({
+            where: { deletedAt: null },
           });
-          
-          hasPreviousPage = !!prevItem;
-        }
-      }
-      
-      // สร้างผลลัพธ์
-      const result = {
-        edges,
-        pageInfo: {
-          startCursor,
-          endCursor,
-          hasNextPage,
-          hasPreviousPage,
+
+          const result = {
+            data: profiles,
+            meta: {
+              total: totalCount,
+              page: 1,
+              limit: totalCount,
+              pages: 1,
+            },
+          };
+
+          return result;
         },
-        totalCount,
-      };
-      
-      // เก็บผลลัพธ์ในแคช
-      await this.localcacheService.set(cacheKey, result, CACHE_TTL.ALL_PROFILES);
-      
-      return result;
+        CACHE_TTL.ALL_PROFILES,
+      );
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, 'find player profiles connection', 'playerProfiles');
+      DatabaseErrorHandler.handleError(
+        error,
+        'find all player profiles',
+        'playerProfiles',
+      );
     }
   }
+
+  async findAllWithOptions(
+    options: OptionalPaginationArgs,
+  ): Promise<PaginatedPlayerProfiles> {
+    try {
+      const cacheKey = this.getListCacheKey(options);
+      return this.cacheService.get<PaginatedPlayerProfiles>(
+        cacheKey,
+        async () => {
+          const {
+            page = 1,
+            limit = 100,
+            orderBy = 'updatedAt',
+            orderDirection = 'desc',
+          } = options;
+
+          const skip = (page - 1) * limit;
+          const orderOption = {};
+          orderOption[orderBy] = orderDirection;
+
+          const [profiles, totalCount] = await Promise.all([
+            this.prisma.playerProfiles.findMany({
+              skip,
+              take: limit,
+              orderBy: orderOption,
+              where: { deletedAt: null },
+            }),
+            this.prisma.playerProfiles.count({
+              where: { deletedAt: null },
+            }),
+          ]);
+
+          return {
+            data: profiles,
+            meta: {
+              total: totalCount,
+              page,
+              limit,
+              pages: Math.ceil(totalCount / limit),
+            },
+          };
+        },
+        CACHE_TTL.ALL_PROFILES,
+      );
+    } catch (error) {
+      console.error('Error in findAllWithOptions:', error);
+      DatabaseErrorHandler.handleError(
+        error,
+        'find player profiles with options',
+        'playerProfiles',
+      );
+    }
+  }
+
+  //---------------------------------------------------------------
+
+  // async findAllWithOptions(
+  //   options: OptionalPaginationArgs,
+  // ): Promise<PaginatedPlayerProfiles> {
+  //   try {
+  //     const {
+  //       page = 1,
+  //       limit = 100,
+  //       orderBy = 'updatedAt',
+  //       orderDirection = 'desc',
+  //     } = options;
+
+  //     const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:${page}:${limit}:${orderBy}:${orderDirection}`;
+  //     const cachedResult =
+  //       await this.localcacheService.get<PaginatedPlayerProfiles>(cacheKey);
+
+  //     if (cachedResult) {
+  //       console.log(
+  //         `Returning player profiles with options from cache: ${cacheKey}`,
+  //       );
+  //       return cachedResult;
+  //     }
+
+  //     const skip = (page - 1) * limit;
+  //     const orderOption = {};
+  //     orderOption[orderBy] = orderDirection;
+
+  //     const profiles = await this.prisma.playerProfiles.findMany({
+  //       skip,
+  //       take: limit,
+  //       orderBy: orderOption,
+  //       where: { deletedAt: null },
+  //     });
+
+  //     const totalCount = await this.prisma.playerProfiles.count({
+  //       where: { deletedAt: null },
+  //     });
+
+  //     const result = {
+  //       data: profiles,
+  //       meta: {
+  //         total: totalCount,
+  //         page,
+  //         limit,
+  //         pages: Math.ceil(totalCount / limit),
+  //       },
+  //     };
+
+  //     await this.localcacheService.set(
+  //       cacheKey,
+  //       result,
+  //       CACHE_TTL.ALL_PROFILES,
+  //     );
+  //     return result;
+  //   } catch (error) {
+  //     console.error('Error in findAllWithOptions:', error);
+  //     DatabaseErrorHandler.handleError(
+  //       error,
+  //       'find player profiles with options',
+  //       'playerProfiles',
+  //     );
+  //   }
+  // }
 
   async findOne(uuid: string) {
     try {
-      // Create cache key for player profile
-      const cacheKey = `player_profile:${uuid}`;
-      
-      // Try to fetch data from cache first
-      const cachedProfile = await this.localcacheService.get(cacheKey);
-      
-      // If data exists in cache, return it immediately
-      if (cachedProfile) {
-        console.log(`Returning player profile ${uuid} from cache`);
-        return cachedProfile;
-      }
-      
-      // If not in cache, fetch from database
-      const playerProfile = await this.prisma.playerProfiles.findUnique({
-        where: { uuid },
-      });
-      
-      if (!playerProfile) {
-        throw new NotFoundException(`Player profile with uuid ${uuid} not found`);
-      }
-      
-      // Store data in cache (TTL 10 minutes)
-      await this.localcacheService.set(cacheKey, playerProfile, 600);
-      
-      return playerProfile;
+      const cacheKey = this.getProfileCacheKey(uuid);
+      return this.cacheService.get(
+        cacheKey,
+        async () => {
+          const playerProfile = await this.prisma.playerProfiles.findUnique({
+            where: { uuid },
+          });
+
+          if (!playerProfile) {
+            throw new NotFoundException(
+              `Player profile with uuid ${uuid} not found`,
+            );
+          }
+
+          return playerProfile;
+        },
+        600, // TTL 10 นาที
+      );
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      DatabaseErrorHandler.handleError(error, `find player profile with uuid ${uuid}`, 'playerProfile');
+      DatabaseErrorHandler.handleError(
+        error,
+        `find player profile with uuid ${uuid}`,
+        'playerProfile',
+      );
     }
   }
 
-  async update(uuid: string, updatePlayerProfileInput: UpdatePlayerProfileInput) {
+  async update(
+    uuid: string,
+    updatePlayerProfileInput: UpdatePlayerProfileInput,
+  ) {
     try {
       const updatedProfile = await this.prisma.playerProfiles.update({
         where: { uuid },
@@ -330,17 +266,20 @@ export class PlayerProfilesService {
           updatedBy: uuid,
         },
       });
-      
-      // Update cache for this profile
-      const cacheKey = `player_profile:${uuid}`;
-      await this.localcacheService.set(cacheKey, updatedProfile, 600);
-      
-      // Clear cache for findAll because data was updated
-      await this.localcacheService.delete('player_profiles:all');
-      
+
+      // ล้าง cache ที่เกี่ยวข้อง
+      await Promise.all([
+        this.cacheService.invalidate(this.getProfileCacheKey(uuid)),
+        this.cacheService.invalidatePattern('player_profiles:*'),
+      ]);
+
       return updatedProfile;
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, `update player profile with uuid ${uuid}`, 'playerProfile');
+      DatabaseErrorHandler.handleError(
+        error,
+        `update player profile with uuid ${uuid}`,
+        'playerProfile',
+      );
     }
   }
 
@@ -349,22 +288,26 @@ export class PlayerProfilesService {
       const deletedProfile = await this.prisma.playerProfiles.delete({
         where: { uuid },
       });
-      
-      // Delete cache for this profile
-      await this.localcacheService.delete(`player_profile:${uuid}`);
-      
-      // Clear cache for findAll because data was deleted
-      await this.localcacheService.delete('player_profiles:all');
-      
+
+      // ล้าง cache ที่เกี่ยวข้อง
+      await Promise.all([
+        this.cacheService.invalidate(this.getProfileCacheKey(uuid)),
+        this.cacheService.invalidatePattern('player_profiles:*'),
+      ]);
+
       return deletedProfile;
     } catch (error) {
-      DatabaseErrorHandler.handleError(error, `remove player profile with uuid ${uuid}`, 'playerProfile');
+      DatabaseErrorHandler.handleError(
+        error,
+        `remove player profile with uuid ${uuid}`,
+        'playerProfile',
+      );
     }
   }
 
   async randomPlayerProfileName(): Promise<string> {
     const generatedName = generateSuperUniquePlayerName();
-    
+
     const existingProfile = await this.prisma.playerProfiles.findFirst({
       where: { name: generatedName },
     });

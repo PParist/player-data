@@ -6,5 +6,5 @@ import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 export class UpdateObtainBaseInput extends PartialType(CreateObtainBaseInput) {
   @Field(() => String)
   @IsUUID()
-  uuid: string
+  uuid: string;
 }

@@ -4,9 +4,7 @@ import { PlayerProfilesResolver } from './player_profiles.resolver';
 import { CacheModule } from '../cache/cache.module';
 
 @Module({
-  imports: [
-    CacheModule,
-  ],
+  imports: [CacheModule],
   providers: [PlayerProfilesResolver, PlayerProfilesService],
 })
 export class PlayerProfilesModule {}

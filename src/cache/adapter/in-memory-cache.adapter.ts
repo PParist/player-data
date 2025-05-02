@@ -45,7 +45,7 @@ export class InMemoryCacheAdapter implements CachePort {
   async mget<T>(keys: string[]): Promise<Record<string, T>> {
     try {
       const result: Record<string, T> = {};
-      
+
       // Execute in parallel for better performance
       await Promise.all(
         keys.map(async (key) => {
@@ -53,9 +53,9 @@ export class InMemoryCacheAdapter implements CachePort {
           if (value !== null) {
             result[key] = value;
           }
-        })
+        }),
       );
-      
+
       return result;
     } catch (error) {
       this.logger.error(`Error multi-getting cache keys: ${error.message}`);
@@ -67,9 +67,9 @@ export class InMemoryCacheAdapter implements CachePort {
     try {
       // Execute in parallel for better performance
       await Promise.all(
-        Object.entries(entries).map(([key, value]) => 
-          this.set(key, value, ttl)
-        )
+        Object.entries(entries).map(([key, value]) =>
+          this.set(key, value, ttl),
+        ),
       );
     } catch (error) {
       this.logger.error(`Error multi-setting cache keys: ${error.message}`);
@@ -78,7 +78,7 @@ export class InMemoryCacheAdapter implements CachePort {
 
   async mdelete(keys: string[]): Promise<void> {
     try {
-      await Promise.all(keys.map(key => this.delete(key)));
+      await Promise.all(keys.map((key) => this.delete(key)));
     } catch (error) {
       this.logger.error(`Error multi-deleting cache keys: ${error.message}`);
     }
@@ -89,7 +89,9 @@ export class InMemoryCacheAdapter implements CachePort {
       const value = await this.get(key);
       return value !== null;
     } catch (error) {
-      this.logger.error(`Error checking if key ${key} exists: ${error.message}`);
+      this.logger.error(
+        `Error checking if key ${key} exists: ${error.message}`,
+      );
       return false;
     }
   }
@@ -98,38 +100,38 @@ export class InMemoryCacheAdapter implements CachePort {
   async deletePattern(pattern: string): Promise<void> {
     try {
       // Convert wildcard pattern to regex
-      const regexPattern = new RegExp(
-        `^${pattern.replace(/\*/g, '.*')}$`
-      );
-      
+      //const regexPattern = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+
       // This is not ideal for production due to memory scan
       // In-memory cache doesn't expose stored keys directly
       // This is a best-effort implementation
-      
+
       this.logger.warn(
-        'deletePattern for in-memory cache is limited and may not be efficient'
+        'deletePattern for in-memory cache is limited and may not be efficient',
       );
-      
+
       // For most in-memory cache managers, we cannot enumerate keys
       // Consider using Redis in production if this feature is needed
     } catch (error) {
-      this.logger.error(`Error deleting keys by pattern ${pattern}: ${error.message}`);
+      this.logger.error(
+        `Error deleting keys by pattern ${pattern}: ${error.message}`,
+      );
     }
   }
 
   // Additional implementations suitable for in-memory cache
-  
+
   async increment(key: string, value: number = 1): Promise<number> {
     try {
       // Get current value
-      const currentValue = await this.get<number>(key) || 0;
-      
+      const currentValue = (await this.get<number>(key)) || 0;
+
       // Calculate new value
       const newValue = currentValue + value;
-      
+
       // Store new value
       await this.set(key, newValue);
-      
+
       return newValue;
     } catch (error) {
       this.logger.error(`Error incrementing key ${key}: ${error.message}`);
@@ -140,14 +142,14 @@ export class InMemoryCacheAdapter implements CachePort {
   async decrement(key: string, value: number = 1): Promise<number> {
     try {
       // Get current value
-      const currentValue = await this.get<number>(key) || 0;
-      
+      const currentValue = (await this.get<number>(key)) || 0;
+
       // Calculate new value
       const newValue = currentValue - value;
-      
+
       // Store new value
       await this.set(key, newValue);
-      
+
       return newValue;
     } catch (error) {
       this.logger.error(`Error decrementing key ${key}: ${error.message}`);
@@ -159,14 +161,14 @@ export class InMemoryCacheAdapter implements CachePort {
     try {
       // Get current value
       const value = await this.get(key);
-      
+
       if (value === null) {
         return false;
       }
-      
+
       // Re-set with new TTL
       await this.set(key, value, ttl);
-      
+
       return true;
     } catch (error) {
       this.logger.error(`Error setting TTL for key ${key}: ${error.message}`);

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - redis-network
+    # เพิ่ม health check เพื่อให้แน่ใจว่า Redis พร้อมใช้งาน
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"  # เข้าถึง Redis Insight ผ่าน http://localhost:5540
+    volumes:
+      - redis-insight-data:/db
+    networks:
+      - redis-network
+    depends_on:
+      redis:
+        condition: service_healthy  # รอให้ Redis พร้อมใช้งานก่อน
+    restart: unless-stopped
+    environment:
+      # ตั้งค่าสภาพแวดล้อมเพิ่มเติมสำหรับ Redis Insight
+      - RITRUSTEDORIGINS=http://localhost:5540
+      - RILOG_LEVEL=info
+
+volumes:
+  redis-data:
+    driver: local
+  redis-insight-data:
+    driver: local  # เก็บข้อมูลการตั้งค่าและประวัติการเชื่อมต่อของ Redis Insight
+
+networks:
+  redis-network:
+    driver: bridge
