@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { CostomeBaseService } from './costome_base.service';
 import { CostomeBase } from './entities/costome_base.entity';
 import { CreateCostomeBaseInput } from './dto/create-costome_base.input';

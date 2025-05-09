@@ -41,5 +41,56 @@ export default registerAs('config', (): Config => {
       tls: process.env.REDIS_TLS === 'true',
       retryStrategy: (times: number) => Math.min(times * 50, 2000),
     },
+    messaging: {
+      broker: {
+        type: (process.env.BROKER_TYPE || 'rabbitmq') as
+          | 'rabbitmq'
+          | 'kafka'
+          | 'sqs',
+        url: process.env.BROKER_URL || 'amqp://localhost:5672',
+        region: process.env.AWS_REGION,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+      options: {
+        prefetchCount: parseInt(process.env.BROKER_PREFETCH_COUNT || '10', 10),
+        reconnectAttempts: parseInt(
+          process.env.BROKER_RECONNECT_ATTEMPTS || '5',
+          10,
+        ),
+        reconnectInterval: parseInt(
+          process.env.BROKER_RECONNECT_INTERVAL || '5000',
+          10,
+        ),
+        deadLetterEnabled: process.env.BROKER_DLQ_ENABLED === 'true',
+        queuePrefix: process.env.BROKER_QUEUE_PREFIX || '',
+      },
+      queues: {
+        'player-events': {
+          retryCount: parseInt(
+            process.env.QUEUE_PLAYER_EVENTS_RETRY_COUNT || '3',
+            10,
+          ),
+          retryDelay: parseInt(
+            process.env.QUEUE_PLAYER_EVENTS_RETRY_DELAY || '5',
+            10,
+          ),
+          deadLetterEnabled:
+            process.env.QUEUE_PLAYER_EVENTS_DLQ_ENABLED !== 'false',
+        },
+        'inventory-events': {
+          retryCount: parseInt(
+            process.env.QUEUE_INVENTORY_EVENTS_RETRY_COUNT || '3',
+            10,
+          ),
+          retryDelay: parseInt(
+            process.env.QUEUE_INVENTORY_EVENTS_RETRY_DELAY || '5',
+            10,
+          ),
+          deadLetterEnabled:
+            process.env.QUEUE_INVENTORY_EVENTS_DLQ_ENABLED !== 'false',
+        },
+      },
+    },
   };
 });

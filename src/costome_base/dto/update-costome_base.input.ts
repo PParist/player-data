@@ -1,6 +1,6 @@
 import { CreateCostomeBaseInput } from './create-costome_base.input';
 import { IsUUID } from 'class-validator';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+import { InputType, Field, PartialType } from '@nestjs/graphql';
 
 @InputType()
 export class UpdateCostomeBaseInput extends PartialType(
