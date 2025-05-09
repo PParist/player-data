@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateCostomeBaseInput } from './dto/create-costome_base.input';

@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { ObtainBaseService } from './obtain_base.service';
 import { ObtainBase } from './entities/obtain_base.entity';
 import { CreateObtainBaseInput } from './dto/create-obtain_base.input';

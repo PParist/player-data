@@ -5,6 +5,7 @@ export interface Config {
   graphql: GraphqlConfig;
   security: SecurityConfig;
   redis: RedisConfig;
+  messaging: MessagingConfig;
 }
 
 export interface NestConfig {
@@ -47,4 +48,28 @@ export interface RedisConfig {
   db?: number;
   tls?: boolean;
   retryStrategy?: (times: number) => number | void;
+}
+
+export interface MessagingConfig {
+  broker: {
+    type: 'rabbitmq' | 'kafka' | 'sqs';
+    url?: string;
+    region?: string;
+    accessKeyId?: string;
+    secretAccessKey?: string;
+  };
+  options: {
+    prefetchCount: number;
+    reconnectAttempts: number;
+    reconnectInterval: number;
+    deadLetterEnabled: boolean;
+    queuePrefix?: string;
+  };
+  queues: {
+    [key: string]: {
+      retryCount: number;
+      retryDelay: number;
+      deadLetterEnabled: boolean;
+    };
+  };
 }

@@ -1,5 +1,4 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { GraphqlConfig } from '../configs/config.interface';
 export enum Rule {
   ADMIN = 'admin',
   USER = 'user',
@@ -7,7 +6,7 @@ export enum Rule {
   IS_OWNER = 'isOwner',
 }
 
-export function registerGraphQLEnums(config?: GraphqlConfig) {
+export function registerGraphQLEnums() {
   registerEnumType(Rule, {
     name: 'Rule',
     description: 'User authorization rules',

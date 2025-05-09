@@ -30,6 +30,6 @@ export abstract class BaseModel {
   @Directive('@auth(rule: admin)')
   deletedBy?: string;
 
-  @Field(() => String, { nullable: true })
-  version?: string;
+  @Field(() => Number, { nullable: true })
+  version?: number;
 }

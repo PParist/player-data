@@ -25,7 +25,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -42,7 +42,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -59,7 +59,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -89,7 +89,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -116,7 +116,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -143,7 +143,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -157,23 +157,21 @@ async function main() {
       userAccountUuid: '550e8400-e29b-41d4-a716-446655440000',
       name: 'HeroKnight',
       description: 'A brave knight from the kingdom of Rune-Midgard',
-      imageUrl: 'https://assets.game.com/profiles/heroknight.png',
+      avatar_url: 'https://assets.game.com/profiles/heroknight.png',
+      frame_url: 'https://assets.game.com/profiles/frame.png',
       level: 42,
       exp: 156000,
       currentMana: 350,
       maxMana: 500,
       zeny: 250000,
       crystalShard: 75,
-      goldenPoringCoin: 8,
-      poringCoin: 250,
-      gachaponTicket: 5,
       createdAt: new Date(),
       createdBy: '550e8400-e29b-41d4-a716-446655440000',
       updatedAt: new Date(),
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -184,23 +182,21 @@ async function main() {
       userAccountUuid: '550e8400-e29b-41d4-a716-446655440001',
       name: 'WizardMaster',
       description: 'A powerful wizard who has mastered the arcane arts',
-      imageUrl: 'https://assets.game.com/profiles/wizardmaster.png',
+      avatar_url: 'https://assets.game.com/profiles/heroknight.png',
+      frame_url: 'https://assets.game.com/profiles/frame.png',
       level: 56,
       exp: 287000,
       currentMana: 850,
       maxMana: 850,
       zeny: 180000,
       crystalShard: 120,
-      goldenPoringCoin: 15,
-      poringCoin: 180,
-      gachaponTicket: 12,
       createdAt: new Date(),
       createdBy: '550e8400-e29b-41d4-a716-446655440000',
       updatedAt: new Date(),
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -224,7 +220,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -245,7 +241,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 
@@ -266,7 +262,7 @@ async function main() {
       updatedBy: '550e8400-e29b-41d4-a716-446655440000',
       deletedAt: null,
       deletedBy: null,
-      version: '1.0.0',
+      version: 1,
     },
   });
 

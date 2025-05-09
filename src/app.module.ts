@@ -19,7 +19,7 @@ import { CacheModule } from './cache/cache.module';
 import { MessageQueueModule } from './message_queue/message_queue.module';
 import config from './common/configs/config';
 
-registerGraphQLEnums(config().graphql);
+registerGraphQLEnums();
 
 @Module({
   imports: [
@@ -48,7 +48,7 @@ registerGraphQLEnums(config().graphql);
     CostomeBaseModule,
     PlayerProfilesModule,
     CacheModule,
-    MessageQueueModule,
+    MessageQueueModule.registerAsync(),
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, DateScalar],
