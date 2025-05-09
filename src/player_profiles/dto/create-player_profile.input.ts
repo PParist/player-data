@@ -16,9 +16,15 @@ export class CreatePlayerProfileInput {
 
   @Field(() => String, {
     nullable: true,
-    description: 'URL to player profile image',
+    description: 'URL to player profile avatar',
   })
-  imageUrl?: string;
+  avatar_url?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'URL to player profile frame',
+  })
+  frame_url?: string;
 
   @Field(() => Int, { description: 'Player level' })
   level: number;
@@ -37,13 +43,4 @@ export class CreatePlayerProfileInput {
 
   @Field(() => Int, { description: 'Crystal shard currency' })
   crystalShard: number;
-
-  @Field(() => Int, { description: 'Golden poring coin currency' })
-  goldenPoringCoin: number;
-
-  @Field(() => Int, { description: 'Poring coin currency' })
-  poringCoin: number;
-
-  @Field(() => Int, { description: 'Gachapon tickets' })
-  gachaponTicket: number;
 }

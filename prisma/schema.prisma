@@ -15,29 +15,65 @@ model PlayerProfiles {
   uuid              String    @unique
   userAccountUuid   String?   @map("user_account_uuid")
   name              String    @unique
-  description       String?
-  imageUrl          String?   @map("image_url")
+  description       String? 
+  avatar_url        String?   @map("avatar_url")
+  frame_url         String?   @map("frame_url")
   level             Int
   exp               Int
   currentMana       Int       @map("current_mana")
   maxMana           Int       @map("max_mana")
   zeny              Int
   crystalShard      Int       @map("crystal_shard")
-  goldenPoringCoin  Int       @map("golden_poring_coin")
-  poringCoin        Int       @map("poring_coin")
-  gachaponTicket    Int       @map("gachapon_ticket")
   createdAt         DateTime  @map("created_at")
   createdBy         String    @map("created_by")
   updatedAt         DateTime? @map("updated_at")
   updatedBy         String?   @map("updated_by")
   deletedAt         DateTime? @map("deleted_at")
   deletedBy         String?   @map("deleted_by")
-  version           String
+  version           Int       
 
   // Relations
   costumes          Costumes[]
 
   @@map("player_profiles")
+}
+
+model AvatarBase {
+  id               Int       @id @default(autoincrement())
+  uuid             String    @unique
+  imageUrl         String
+  obtainsBaseUuid  String
+  createdAt        DateTime  @default(now())
+  createdBy        String?
+  updatedAt        DateTime  @updatedAt
+  updatedBy        String?
+  deletedAt        DateTime?
+  deletedBy        String?
+  version          Int       
+
+  // Relations
+  obtainBase       ObtainBases @relation(fields: [obtainsBaseUuid], references: [uuid])
+
+  @@map("avatar_bases")
+}
+
+model FrameBase {
+  id               Int       @id @default(autoincrement())
+  uuid             String    @unique
+  imageUrl         String
+  obtainsBaseUuid  String
+  createdAt        DateTime  @default(now())
+  createdBy        String?
+  updatedAt        DateTime  @updatedAt
+  updatedBy        String?
+  deletedAt        DateTime?
+  deletedBy        String?
+  version          Int      
+
+  // Relations
+  obtainBase       ObtainBases @relation(fields: [obtainsBaseUuid], references: [uuid])
+
+  @@map("frame_bases")
 }
 
 model CostumeBases {
@@ -62,7 +98,7 @@ model CostumeBases {
   updatedBy       String?   @map("updated_by")
   deletedAt       DateTime? @map("deleted_at")
   deletedBy       String?   @map("deleted_by")
-  version         String
+  version         Int       
 
   // Relations
   obtainBase      ObtainBases? @relation(fields: [obtainsBaseUuid], references: [uuid])
@@ -87,7 +123,7 @@ model Costumes {
   updatedBy       String?   @map("updated_by")
   deletedAt       DateTime? @map("deleted_at")
   deletedBy       String?   @map("deleted_by")
-  version         String
+  version         Int      
 
   // Relations
   player          PlayerProfiles @relation(fields: [playerUuid], references: [uuid])
@@ -108,10 +144,52 @@ model ObtainBases {
   updatedBy    String?   @map("updated_by")
   deletedAt    DateTime? @map("deleted_at")
   deletedBy    String?   @map("deleted_by")
-  version      String
+  version      Int       
 
   // Relations
-  costumeBases CostumeBases[]
+  avatarBases   AvatarBase[]
+  frameBases    FrameBase[]
+  costumeBases  CostumeBases[]
 
   @@map("obtain_bases")
+}
+
+model Announcements {
+  id           Int       @id @default(autoincrement())
+  uuid         String    @unique
+  info         String?
+  image        String?
+  createdAt    DateTime  @map("created_at")
+  createdBy    String    @map("created_by")
+  updatedAt    DateTime? @map("updated_at")
+  updatedBy    String?   @map("updated_by")
+  deletedAt    DateTime? @map("deleted_at")
+  deletedBy    String?   @map("deleted_by")
+  version      Int       
+
+  @@map("announcements")
+}
+
+model TalentBases {
+  id           Int       @id @default(autoincrement())
+  uuid         String    @unique
+  stage        Int
+  type         String
+  levelMax     Int       @map("level_max")
+  stat         String    // 2, 0.10%, 5.00%
+  skillPoint   Int       @map("skill_point")
+  zenySpend    Int       @map("zeny_spend")  // 1000, 10000, 100000
+  imageParth   String?   @map("image_parth") // มีการสะกดผิดจาก path เป็น parth ตามต้นฉบับ
+  name         String
+  detail       String?
+  isActive     Int       @map("is_active")
+  createdAt    DateTime  @map("created_at")
+  createdBy    String    @map("created_by")
+  updatedAt    DateTime? @map("updated_at")
+  updatedBy    String?   @map("updated_by")
+  deletedAt    DateTime? @map("deleted_at")
+  deletedBy    String?   @map("deleted_by")
+  version      Int       
+
+  @@map("talent_bases")
 }

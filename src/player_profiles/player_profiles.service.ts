@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from 'nestjs-prisma';
 import { CreatePlayerProfileInput } from './dto/create-player_profile.input';
 import { UpdatePlayerProfileInput } from './dto/update-player_profile.input';
-import { VERSION } from '@common/constants/string';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { generateSuperUniquePlayerName } from 'src/common/utils/random';
@@ -12,12 +11,15 @@ import {
   OptionalPaginationArgs,
   PaginatedPlayerProfiles,
 } from './player_profiles.resolver';
-
+import { MessageQueueService } from '../message_queue/message_queue.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
 export class PlayerProfilesService {
   constructor(
     private prisma: PrismaService,
     private cacheService: CacheLayerService,
+    private readonly messageQueue: MessageQueueService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private getProfileCacheKey(uuid: string): string {
@@ -49,7 +51,7 @@ export class PlayerProfilesService {
           updatedBy: newProfileUuid,
           deletedAt: null,
           deletedBy: null,
-          version: VERSION,
+          version: 1,
         },
       });
 
@@ -147,7 +149,6 @@ export class PlayerProfilesService {
         CACHE_TTL.ALL_PROFILES,
       );
     } catch (error) {
-      console.error('Error in findAllWithOptions:', error);
       DatabaseErrorHandler.handleError(
         error,
         'find player profiles with options',
@@ -155,71 +156,6 @@ export class PlayerProfilesService {
       );
     }
   }
-
-  //---------------------------------------------------------------
-
-  // async findAllWithOptions(
-  //   options: OptionalPaginationArgs,
-  // ): Promise<PaginatedPlayerProfiles> {
-  //   try {
-  //     const {
-  //       page = 1,
-  //       limit = 100,
-  //       orderBy = 'updatedAt',
-  //       orderDirection = 'desc',
-  //     } = options;
-
-  //     const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:${page}:${limit}:${orderBy}:${orderDirection}`;
-  //     const cachedResult =
-  //       await this.localcacheService.get<PaginatedPlayerProfiles>(cacheKey);
-
-  //     if (cachedResult) {
-  //       console.log(
-  //         `Returning player profiles with options from cache: ${cacheKey}`,
-  //       );
-  //       return cachedResult;
-  //     }
-
-  //     const skip = (page - 1) * limit;
-  //     const orderOption = {};
-  //     orderOption[orderBy] = orderDirection;
-
-  //     const profiles = await this.prisma.playerProfiles.findMany({
-  //       skip,
-  //       take: limit,
-  //       orderBy: orderOption,
-  //       where: { deletedAt: null },
-  //     });
-
-  //     const totalCount = await this.prisma.playerProfiles.count({
-  //       where: { deletedAt: null },
-  //     });
-
-  //     const result = {
-  //       data: profiles,
-  //       meta: {
-  //         total: totalCount,
-  //         page,
-  //         limit,
-  //         pages: Math.ceil(totalCount / limit),
-  //       },
-  //     };
-
-  //     await this.localcacheService.set(
-  //       cacheKey,
-  //       result,
-  //       CACHE_TTL.ALL_PROFILES,
-  //     );
-  //     return result;
-  //   } catch (error) {
-  //     console.error('Error in findAllWithOptions:', error);
-  //     DatabaseErrorHandler.handleError(
-  //       error,
-  //       'find player profiles with options',
-  //       'playerProfiles',
-  //     );
-  //   }
-  // }
 
   async findOne(uuid: string) {
     try {
