@@ -1,60 +1,14 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Int,
-  ArgsType,
-  Field,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ObjectType } from '@nestjs/graphql';
 import { CostomeBaseService } from './costome_base.service';
 import { CostomeBase } from './entities/costome_base.entity';
 import { CreateCostomeBaseInput } from './dto/create-costome_base.input';
 import { UpdateCostomeBaseInput } from './dto/update-costome_base.input';
-import { OrderDirection } from '../common/order/order-direction';
-
-@ArgsType()
-export class OptionalPaginationArgs {
-  @Field(() => Int, { nullable: true, defaultValue: 1 })
-  page?: number;
-
-  @Field(() => Int, { nullable: true, defaultValue: 100 })
-  limit?: number;
-
-  @Field(() => String, { nullable: true, defaultValue: 'updatedAt' })
-  orderBy?: string;
-
-  @Field(() => OrderDirection, {
-    nullable: true,
-    defaultValue: OrderDirection.desc,
-  })
-  orderDirection?: OrderDirection;
-}
-
+import {
+  PaginationArgs,
+  Paginated,
+} from '../common/pagination/pagination.types';
 @ObjectType()
-export class PaginationMeta {
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  limit: number;
-
-  @Field(() => Int)
-  pages: number;
-}
-
-@ObjectType()
-export class PaginatedCustomeBases {
-  @Field(() => [CostomeBase])
-  data: CostomeBase[];
-
-  @Field(() => PaginationMeta)
-  meta: PaginationMeta;
-}
+export class PaginatedCostomeBases extends Paginated(CostomeBase) {}
 
 @Resolver(() => CostomeBase)
 export class CostomeBaseResolver {
@@ -68,8 +22,8 @@ export class CostomeBaseResolver {
     return this.costomeBaseService.create(createCostomeBaseInput);
   }
 
-  @Query(() => PaginatedCustomeBases, { name: 'costomeBases' })
-  findAll(@Args() paginationArgs?: OptionalPaginationArgs) {
+  @Query(() => PaginatedCostomeBases, { name: 'costomeBases' })
+  findAll(@Args() paginationArgs?: PaginationArgs) {
     try {
       if (paginationArgs && Object.keys(paginationArgs).length > 0) {
         return this.costomeBaseService.findAllWithOptions(paginationArgs);
@@ -81,8 +35,8 @@ export class CostomeBaseResolver {
     }
   }
 
-  @Query(() => PaginatedCustomeBases, { name: 'paginatedCostomeBases' })
-  findAllPaginated(@Args() paginationArgs: OptionalPaginationArgs) {
+  @Query(() => PaginatedCostomeBases, { name: 'paginatedCostomeBases' })
+  findAllPaginated(@Args() paginationArgs: PaginationArgs) {
     try {
       return this.costomeBaseService.findAllWithOptions(paginationArgs);
     } catch (error) {

@@ -6,10 +6,8 @@ import { UpdateAvatarBaseInput } from './dto/update-avatar_base.input';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import {
-  OptionalPaginationArgs,
-  PaginatedAvatarBases,
-} from './avatar_base.resolver';
+import { PaginationArgs } from '../common/pagination/pagination.types';
+import { PaginatedAvatarBases } from './avatar_base.resolver';
 
 @Injectable()
 export class AvatarBaseService {
@@ -22,7 +20,7 @@ export class AvatarBaseService {
     return `avatar_base:${uuid}`;
   }
 
-  private getListCacheKey(options?: OptionalPaginationArgs): string {
+  private getListCacheKey(options?: PaginationArgs): string {
     if (!options) return `${CACHE_KEYS.ALL_AVATARBASES}`;
 
     const {
@@ -99,7 +97,7 @@ export class AvatarBaseService {
     }
   }
 
-  async findAllWithOptions(options: OptionalPaginationArgs) {
+  async findAllWithOptions(options: PaginationArgs) {
     try {
       const cacheKey = this.getListCacheKey(options);
       return this.cacheService.gets<PaginatedAvatarBases>(

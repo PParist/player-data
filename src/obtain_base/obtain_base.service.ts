@@ -6,27 +6,21 @@ import { UpdateObtainBaseInput } from './dto/update-obtain_base.input';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import { MessageQueueService } from '../message_queue/message_queue.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  OptionalPaginationArgs,
-  PaginatedObtainBases,
-} from './obtain_base.resolver';
+import { PaginationArgs } from '../common/pagination/pagination.types';
+import { PaginatedObtainBases } from './obtain_base.resolver';
 
 @Injectable()
 export class ObtainBaseService {
   constructor(
     private prisma: PrismaService,
     private cacheService: CacheLayerService,
-    private readonly messageQueue: MessageQueueService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private getObtainCacheKey(uuid: string): string {
     return `obtain_base:${uuid}`;
   }
 
-  private getListCacheKey(options?: OptionalPaginationArgs): string {
+  private getListCacheKey(options?: PaginationArgs): string {
     if (!options) return 'obtain_bases:all';
 
     const {
@@ -105,7 +99,7 @@ export class ObtainBaseService {
     }
   }
 
-  async findAllWithOptions(options: OptionalPaginationArgs) {
+  async findAllWithOptions(options: PaginationArgs) {
     try {
       const cacheKey = this.getListCacheKey(options);
       return this.cacheService.gets<PaginatedObtainBases>(

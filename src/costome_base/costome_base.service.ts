@@ -6,10 +6,8 @@ import { UpdateCostomeBaseInput } from './dto/update-costome_base.input';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import {
-  OptionalPaginationArgs,
-  PaginatedCustomeBases,
-} from './costome_base.resolver';
+import { PaginationArgs } from '../common/pagination/pagination.types';
+import { PaginatedCostomeBases } from './costome_base.resolver';
 
 @Injectable()
 export class CostomeBaseService {
@@ -22,7 +20,7 @@ export class CostomeBaseService {
     return `costume_base:${uuid}`;
   }
 
-  private getListCacheKey(options?: OptionalPaginationArgs): string {
+  private getListCacheKey(options?: PaginationArgs): string {
     if (!options) return 'costume_bases:all';
 
     const {
@@ -69,7 +67,7 @@ export class CostomeBaseService {
   async findAll() {
     try {
       const cacheKey = `${CACHE_KEYS.ALL_CONSUMEBASES || 'all_costumes'}:all`;
-      return this.cacheService.gets<PaginatedCustomeBases>(
+      return this.cacheService.gets<PaginatedCostomeBases>(
         cacheKey,
         async () => {
           const costumeBases = await this.prisma.costumeBases.findMany({
@@ -102,10 +100,10 @@ export class CostomeBaseService {
     }
   }
 
-  async findAllWithOptions(options: OptionalPaginationArgs) {
+  async findAllWithOptions(options: PaginationArgs) {
     try {
       const cacheKey = this.getListCacheKey(options);
-      return this.cacheService.gets<PaginatedCustomeBases>(
+      return this.cacheService.gets<PaginatedCostomeBases>(
         cacheKey,
         async () => {
           const {

@@ -1,61 +1,16 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Int,
-  ArgsType,
-  Field,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ObjectType } from '@nestjs/graphql';
 import { PlayerProfilesService } from './player_profiles.service';
 import { PlayerProfile } from './entities/player_profile.entity';
 import { CreatePlayerProfileInput } from './dto/create-player_profile.input';
 import { UpdatePlayerProfileInput } from './dto/update-player_profile.input';
 import { Name } from './entities/random_profile_name';
-import { OrderDirection } from '../common/order/order-direction';
-
-@ArgsType()
-export class OptionalPaginationArgs {
-  @Field(() => Int, { nullable: true, defaultValue: 1 })
-  page?: number;
-
-  @Field(() => Int, { nullable: true, defaultValue: 100 })
-  limit?: number;
-
-  @Field(() => String, { nullable: true, defaultValue: 'updatedAt' })
-  orderBy?: string;
-
-  @Field(() => OrderDirection, {
-    nullable: true,
-    defaultValue: OrderDirection.desc,
-  })
-  orderDirection?: OrderDirection;
-}
+import {
+  PaginationArgs,
+  Paginated,
+} from '../common/pagination/pagination.types';
 
 @ObjectType()
-export class PaginationMeta {
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  limit: number;
-
-  @Field(() => Int)
-  pages: number;
-}
-
-@ObjectType()
-export class PaginatedPlayerProfiles {
-  @Field(() => [PlayerProfile])
-  data: PlayerProfile[];
-
-  @Field(() => PaginationMeta)
-  meta: PaginationMeta;
-}
+export class PaginatedPlayerProfiles extends Paginated(PlayerProfile) {}
 
 @Resolver(() => PlayerProfile)
 export class PlayerProfilesResolver {
@@ -70,7 +25,7 @@ export class PlayerProfilesResolver {
   }
 
   @Query(() => PaginatedPlayerProfiles, { name: 'playerProfiles' })
-  findAll(@Args() paginationArgs?: OptionalPaginationArgs) {
+  findAll(@Args() paginationArgs?: PaginationArgs) {
     if (paginationArgs && Object.keys(paginationArgs).length > 0) {
       return this.playerProfilesService.findAllWithOptions(paginationArgs);
     }
@@ -78,7 +33,7 @@ export class PlayerProfilesResolver {
   }
 
   @Query(() => PaginatedPlayerProfiles, { name: 'paginatedPlayerProfiles' })
-  findAllPaginated(@Args() paginationArgs: OptionalPaginationArgs) {
+  findAllPaginated(@Args() paginationArgs: PaginationArgs) {
     return this.playerProfilesService.findAllWithOptions(paginationArgs);
   }
 

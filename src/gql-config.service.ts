@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { GqlOptionsFactory } from '@nestjs/graphql';
 import { authDirectiveTransformer } from 'src/common/graphql/auth_directive';
 import { addDirectiveDefinitionsToSchema } from 'src/common/utils/schema.utils';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 @Injectable()
 export class GqlConfigService implements GqlOptionsFactory {
@@ -19,6 +20,7 @@ export class GqlConfigService implements GqlOptionsFactory {
       buildSchemaOptions: {
         numberScalarMode: 'integer',
       },
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
       // subscription
       installSubscriptionHandlers: true,
       includeStacktraceInErrorResponses: graphqlConfig.debug,

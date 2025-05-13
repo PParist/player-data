@@ -2,6 +2,42 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Announcement {
+  createdAt: Date
+  createdBy: String
+  deletedAt: Date
+  deletedBy: String
+  id: ID!
+
+  """URL to image avatar"""
+  image: String!
+
+  """info"""
+  info: String!
+  updatedAt: Date
+  updatedBy: String
+  uuid: String!
+  version: Int
+}
+
+type AvatarBase {
+  createdAt: Date
+  createdBy: String
+  deletedAt: Date
+  deletedBy: String
+  id: ID!
+
+  """Image"""
+  imageUrl: String!
+
+  """Obtain Base Uuid"""
+  obtainsBaseUuid: String
+  updatedAt: Date
+  updatedBy: String
+  uuid: String!
+  version: Int
+}
+
 type CostomeBase {
   """Colors"""
   colors: String
@@ -10,11 +46,11 @@ type CostomeBase {
   deletedAt: Date
   deletedBy: String
 
-  """Equipment ID"""
-  equimentID: String!
-
   """Equioment Type"""
-  equipmentType: Int!
+  equipType: Int!
+
+  """Equipment ID"""
+  equipmentId: String!
   id: ID!
 
   """Image Path"""
@@ -49,7 +85,23 @@ type CostomeBase {
   updatedAt: Date
   updatedBy: String
   uuid: String!
-  version: String
+  version: Int
+}
+
+input CreateAnnouncementInput {
+  """URL to image avatar"""
+  image: String!
+
+  """info"""
+  info: String!
+}
+
+input CreateAvatarBaseInput {
+  """URL to image avatar"""
+  imageUrl: String!
+
+  """Obtain Base Uuid"""
+  obtainsBaseUuid: String!
 }
 
 input CreateCostomeBaseInput {
@@ -93,6 +145,14 @@ input CreateCostomeBaseInput {
   tier: Int!
 }
 
+input CreateFrameBaseInput {
+  """URL to image avatar"""
+  imageUrl: String!
+
+  """Obtain Base Uuid"""
+  obtainsBaseUuid: String!
+}
+
 input CreateObtainBaseInput {
   """info"""
   info: String
@@ -105,6 +165,9 @@ input CreateObtainBaseInput {
 }
 
 input CreatePlayerProfileInput {
+  """URL to player profile avatar"""
+  avatar_url: String
+
   """Crystal shard currency"""
   crystalShard: Int!
 
@@ -117,14 +180,8 @@ input CreatePlayerProfileInput {
   """Player experience points"""
   exp: Int!
 
-  """Gachapon tickets"""
-  gachaponTicket: Int!
-
-  """Golden poring coin currency"""
-  goldenPoringCoin: Int!
-
-  """URL to player profile image"""
-  imageUrl: String
+  """URL to player profile frame"""
+  frame_url: String
 
   """Player level"""
   level: Int!
@@ -135,9 +192,6 @@ input CreatePlayerProfileInput {
   """Player profile name"""
   name: String!
 
-  """Poring coin currency"""
-  poringCoin: Int!
-
   """User account UUID"""
   userAccountUuid: String
 
@@ -145,19 +199,81 @@ input CreatePlayerProfileInput {
   zeny: Int!
 }
 
+input CreateTalentBaseInput {
+  """detail"""
+  detail: String
+
+  """image parth (misspelled path)"""
+  imageParth: String
+
+  """is active"""
+  isActive: Int!
+
+  """level max"""
+  levelMax: Int!
+
+  """name"""
+  name: String!
+
+  """skill point"""
+  skillPoint: Int!
+
+  """stage"""
+  stage: Int!
+
+  """stat"""
+  stat: String!
+
+  """type"""
+  type: String!
+
+  """zeny spend"""
+  zenySpend: Int!
+}
+
 """Date custom scalar type"""
 scalar Date
 
+type FrameBase {
+  createdAt: Date
+  createdBy: String
+  deletedAt: Date
+  deletedBy: String
+  id: ID!
+
+  """Image"""
+  imageUrl: String!
+
+  """Obtain Base Uuid"""
+  obtainsBaseUuid: String
+  updatedAt: Date
+  updatedBy: String
+  uuid: String!
+  version: Int
+}
+
 type Mutation {
+  createAnnouncement(createAnnouncementInput: CreateAnnouncementInput!): Announcement!
+  createAvatarBase(createAvatarBaseInput: CreateAvatarBaseInput!): AvatarBase!
   createCostomeBase(createCostomeBaseInput: CreateCostomeBaseInput!): CostomeBase!
+  createFrameBase(createFrameBaseInput: CreateFrameBaseInput!): FrameBase!
   createObtainBase(createObtainBaseInput: CreateObtainBaseInput!): ObtainBase!
   createPlayerProfile(createPlayerProfileInput: CreatePlayerProfileInput!): PlayerProfile!
+  createTalentBase(createTalentBaseInput: CreateTalentBaseInput!): TalentBase!
+  removeAnnouncement(uuid: String!): Announcement!
+  removeAvatarBase(uuid: String!): AvatarBase!
   removeCostomeBase(uuid: String!): CostomeBase!
+  removeFrameBase(uuid: String!): FrameBase!
   removeObtainBase(uuid: String!): ObtainBase!
   removePlayerProfile(uuid: String!): PlayerProfile!
+  removeTalentBase(uuid: String!): TalentBase!
+  updateAnnouncement(updateAnnouncementInput: UpdateAnnouncementInput!): Announcement!
+  updateAvatarBase(updateAvatarBaseInput: UpdateAvatarBaseInput!): AvatarBase!
   updateCostomeBase(updateCostomeBaseInput: UpdateCostomeBaseInput!): CostomeBase!
+  updateFrameBase(updateFrameBaseInput: UpdateFrameBaseInput!): FrameBase!
   updateObtainBase(updateObtainBaseInput: UpdateObtainBaseInput!): ObtainBase!
   updatePlayerProfile(updatePlayerProfileInput: UpdatePlayerProfileInput!): PlayerProfile!
+  updateTalentBase(updateTalentBaseInput: UpdateTalentBaseInput!): TalentBase!
 }
 
 type Name {
@@ -183,7 +299,7 @@ type ObtainBase {
   updatedAt: Date
   updatedBy: String
   uuid: String!
-  version: String
+  version: Int
 }
 
 """
@@ -194,8 +310,38 @@ enum OrderDirection {
   desc
 }
 
+type PaginatedAnnouncements {
+  data: [Announcement!]!
+  meta: PaginationMeta!
+}
+
+type PaginatedAvatarBases {
+  data: [AvatarBase!]!
+  meta: PaginationMeta!
+}
+
+type PaginatedCostomeBases {
+  data: [CostomeBase!]!
+  meta: PaginationMeta!
+}
+
+type PaginatedFrameBases {
+  data: [FrameBase!]!
+  meta: PaginationMeta!
+}
+
+type PaginatedObtainBases {
+  data: [ObtainBase!]!
+  meta: PaginationMeta!
+}
+
 type PaginatedPlayerProfiles {
   data: [PlayerProfile!]!
+  meta: PaginationMeta!
+}
+
+type PaginatedTalentBases {
+  data: [TalentBase!]!
   meta: PaginationMeta!
 }
 
@@ -207,6 +353,8 @@ type PaginationMeta {
 }
 
 type PlayerProfile {
+  """URL to player profile avatar"""
+  avatar_url: String
   createdAt: Date
   createdBy: String
 
@@ -224,15 +372,9 @@ type PlayerProfile {
   """Player experience points"""
   exp: Int!
 
-  """Gachapon tickets"""
-  gachaponTicket: Int!
-
-  """Golden poring coin currency"""
-  goldenPoringCoin: Int!
+  """URL to player profile frame"""
+  frame_url: String
   id: ID!
-
-  """URL to player profile image"""
-  imageUrl: String
 
   """Player level"""
   level: Int!
@@ -242,16 +384,13 @@ type PlayerProfile {
 
   """Player profile name"""
   name: String!
-
-  """Poring coin currency"""
-  poringCoin: Int!
   updatedAt: Date
   updatedBy: String
 
   """User account UUID"""
   userAccountUuid: String
   uuid: String!
-  version: String
+  version: Int
 
   """Player currency (Zeny)"""
   zeny: Int!
@@ -269,23 +408,99 @@ type Post {
   updatedAt: Date
   updatedBy: String
   uuid: String!
-  version: String
+  version: Int
 }
 
 type Query {
+  announcement(uuid: String!): Announcement!
+  announcements(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedAnnouncements!
+  avatarBase(uuid: String!): AvatarBase!
+  avatarBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedAvatarBases!
   costomeBase(uuid: String!): CostomeBase!
+  costomeBaseByEquipmentId(equipmentId: String!): CostomeBase!
+  costomeBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedCostomeBases!
+  frameBase(uuid: String!): FrameBase!
+  frameBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedFrameBases!
   hello(name: String!): String!
   helloWorld: String!
   obtainBase(uuid: String!): ObtainBase!
-  obtainBases: [ObtainBase!]!
+  obtainBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedObtainBases!
+  paginatedAnnouncements(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedAnnouncements!
+  paginatedAvatarBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedAvatarBases!
+  paginatedCostomeBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedCostomeBases!
+  paginatedFrameBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedFrameBases!
+  paginatedObtainBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedObtainBases!
   paginatedPlayerProfiles(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedPlayerProfiles!
+  paginatedTalentBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedTalentBases!
   playerProfile(uuid: String!): PlayerProfile!
   playerProfiles(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedPlayerProfiles!
   randomPlayerName: Name!
+  talentBase(uuid: String!): TalentBase!
+  talentBases(limit: Int = 100, orderBy: String = "updatedAt", orderDirection: OrderDirection = desc, page: Int = 1): PaginatedTalentBases!
 }
 
 type Subscription {
   postCreated: Post!
+}
+
+type TalentBase {
+  createdAt: Date
+  createdBy: String
+  deletedAt: Date
+  deletedBy: String
+
+  """detail"""
+  detail: String
+  id: ID!
+
+  """image parth (misspelled path)"""
+  imageParth: String
+
+  """is active"""
+  isActive: Int!
+
+  """level max"""
+  levelMax: Int!
+
+  """name"""
+  name: String!
+
+  """skill point"""
+  skillPoint: Int!
+
+  """stage"""
+  stage: Int!
+
+  """stat"""
+  stat: String!
+
+  """type"""
+  type: String!
+  updatedAt: Date
+  updatedBy: String
+  uuid: String!
+  version: Int
+
+  """zeny spend"""
+  zenySpend: Int!
+}
+
+input UpdateAnnouncementInput {
+  """URL to image avatar"""
+  image: String
+
+  """info"""
+  info: String
+  uuid: String!
+}
+
+input UpdateAvatarBaseInput {
+  """URL to image avatar"""
+  imageUrl: String
+
+  """Obtain Base Uuid"""
+  obtainsBaseUuid: String
+  uuid: String!
 }
 
 input UpdateCostomeBaseInput {
@@ -330,6 +545,15 @@ input UpdateCostomeBaseInput {
   uuid: String!
 }
 
+input UpdateFrameBaseInput {
+  """URL to image avatar"""
+  imageUrl: String
+
+  """Obtain Base Uuid"""
+  obtainsBaseUuid: String
+  uuid: String!
+}
+
 input UpdateObtainBaseInput {
   """info"""
   info: String
@@ -343,6 +567,9 @@ input UpdateObtainBaseInput {
 }
 
 input UpdatePlayerProfileInput {
+  """URL to player profile avatar"""
+  avatar_url: String
+
   """Crystal shard currency"""
   crystalShard: Int
 
@@ -355,14 +582,8 @@ input UpdatePlayerProfileInput {
   """Player experience points"""
   exp: Int
 
-  """Gachapon tickets"""
-  gachaponTicket: Int
-
-  """Golden poring coin currency"""
-  goldenPoringCoin: Int
-
-  """URL to player profile image"""
-  imageUrl: String
+  """URL to player profile frame"""
+  frame_url: String
 
   """Player level"""
   level: Int
@@ -373,13 +594,43 @@ input UpdatePlayerProfileInput {
   """Player profile name"""
   name: String
 
-  """Poring coin currency"""
-  poringCoin: Int
-
   """User account UUID"""
   userAccountUuid: String
   uuid: String!
 
   """Player currency (Zeny)"""
   zeny: Int
+}
+
+input UpdateTalentBaseInput {
+  """detail"""
+  detail: String
+
+  """image parth (misspelled path)"""
+  imageParth: String
+
+  """is active"""
+  isActive: Int
+
+  """level max"""
+  levelMax: Int
+
+  """name"""
+  name: String
+
+  """skill point"""
+  skillPoint: Int
+
+  """stage"""
+  stage: Int
+
+  """stat"""
+  stat: String
+
+  """type"""
+  type: String
+  uuid: String!
+
+  """zeny spend"""
+  zenySpend: Int
 }

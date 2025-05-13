@@ -6,10 +6,8 @@ import { UpdateTalentBaseInput } from './dto/update-talent_base.input';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import {
-  OptionalPaginationArgs,
-  PaginatedTalentBases,
-} from './talent_bases.resolver';
+import { PaginationArgs } from '../common/pagination/pagination.types';
+import { PaginatedTalentBases } from './talent_bases.resolver';
 
 @Injectable()
 export class TalentBasesService {
@@ -22,7 +20,7 @@ export class TalentBasesService {
     return `talent_base:${uuid}`;
   }
 
-  private getListCacheKey(options?: OptionalPaginationArgs): string {
+  private getListCacheKey(options?: PaginationArgs): string {
     if (!options) return 'talent_bases:all';
 
     const {
@@ -99,7 +97,7 @@ export class TalentBasesService {
     }
   }
 
-  async findAllWithOptions(options: OptionalPaginationArgs) {
+  async findAllWithOptions(options: PaginationArgs) {
     try {
       const cacheKey = this.getListCacheKey(options);
       return this.cacheService.gets<PaginatedTalentBases>(

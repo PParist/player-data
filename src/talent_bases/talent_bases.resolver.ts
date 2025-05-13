@@ -1,56 +1,15 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Int,
-  ArgsType,
-  Field,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ObjectType } from '@nestjs/graphql';
 import { TalentBasesService } from './talent_bases.service';
 import { TalentBase } from './entities/talent_base.entity';
 import { CreateTalentBaseInput } from './dto/create-talent_base.input';
 import { UpdateTalentBaseInput } from './dto/update-talent_base.input';
-
-@ArgsType()
-export class OptionalPaginationArgs {
-  @Field(() => Int, { nullable: true, defaultValue: 1 })
-  page?: number;
-
-  @Field(() => Int, { nullable: true, defaultValue: 100 })
-  limit?: number;
-
-  @Field(() => String, { nullable: true, defaultValue: 'updatedAt' })
-  orderBy?: string;
-
-  @Field(() => String, { nullable: true, defaultValue: 'desc' })
-  orderDirection?: string;
-}
+import {
+  PaginationArgs,
+  Paginated,
+} from '../common/pagination/pagination.types';
 
 @ObjectType()
-export class PaginationMeta {
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  limit: number;
-
-  @Field(() => Int)
-  pages: number;
-}
-
-@ObjectType()
-export class PaginatedTalentBases {
-  @Field(() => [TalentBase])
-  data: TalentBase[];
-
-  @Field(() => PaginationMeta)
-  meta: PaginationMeta;
-}
+export class PaginatedTalentBases extends Paginated(TalentBase) {}
 
 @Resolver(() => TalentBase)
 export class TalentBasesResolver {
@@ -64,7 +23,7 @@ export class TalentBasesResolver {
   }
 
   @Query(() => PaginatedTalentBases, { name: 'talentBases' })
-  findAll(@Args() paginationArgs?: OptionalPaginationArgs) {
+  findAll(@Args() paginationArgs?: PaginationArgs) {
     if (paginationArgs && Object.keys(paginationArgs).length > 0) {
       return this.talentBasesService.findAllWithOptions(paginationArgs);
     }
@@ -72,7 +31,7 @@ export class TalentBasesResolver {
   }
 
   @Query(() => PaginatedTalentBases, { name: 'paginatedTalentBases' })
-  findAllPaginated(@Args() paginationArgs: OptionalPaginationArgs) {
+  findAllPaginated(@Args() paginationArgs: PaginationArgs) {
     return this.talentBasesService.findAllWithOptions(paginationArgs);
   }
 

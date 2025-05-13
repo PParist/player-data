@@ -6,10 +6,8 @@ import { UpdateFrameBaseInput } from './dto/update-frame_base.input';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import {
-  OptionalPaginationArgs,
-  PaginatedFrameBases,
-} from './frame_bases.resolver';
+import { PaginationArgs } from '../common/pagination/pagination.types';
+import { PaginatedFrameBases } from './frame_bases.resolver';
 
 @Injectable()
 export class FrameBasesService {
@@ -22,7 +20,7 @@ export class FrameBasesService {
     return `frame_base:${uuid}`;
   }
 
-  private getListCacheKey(options?: OptionalPaginationArgs): string {
+  private getListCacheKey(options?: PaginationArgs): string {
     if (!options) return 'frame_bases:all';
 
     const {
@@ -94,7 +92,7 @@ export class FrameBasesService {
     }
   }
 
-  async findAllWithOptions(options: OptionalPaginationArgs) {
+  async findAllWithOptions(options: PaginationArgs) {
     try {
       const cacheKey = this.getListCacheKey(options);
       return this.cacheService.gets<PaginatedFrameBases>(

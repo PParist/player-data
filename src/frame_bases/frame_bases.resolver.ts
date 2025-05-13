@@ -1,60 +1,14 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Int,
-  ArgsType,
-  Field,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ObjectType } from '@nestjs/graphql';
 import { FrameBasesService } from './frame_bases.service';
 import { FrameBase } from './entities/frame_base.entity';
 import { CreateFrameBaseInput } from './dto/create-frame_base.input';
 import { UpdateFrameBaseInput } from './dto/update-frame_base.input';
-import { OrderDirection } from '../common/order/order-direction';
-
-@ArgsType()
-export class OptionalPaginationArgs {
-  @Field(() => Int, { nullable: true, defaultValue: 1 })
-  page?: number;
-
-  @Field(() => Int, { nullable: true, defaultValue: 100 })
-  limit?: number;
-
-  @Field(() => String, { nullable: true, defaultValue: 'updatedAt' })
-  orderBy?: string;
-
-  @Field(() => OrderDirection, {
-    nullable: true,
-    defaultValue: OrderDirection.desc,
-  })
-  orderDirection?: OrderDirection;
-}
-
+import {
+  PaginationArgs,
+  Paginated,
+} from '../common/pagination/pagination.types';
 @ObjectType()
-export class PaginationMeta {
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  limit: number;
-
-  @Field(() => Int)
-  pages: number;
-}
-
-@ObjectType()
-export class PaginatedFrameBases {
-  @Field(() => [FrameBase])
-  data: FrameBase[];
-
-  @Field(() => PaginationMeta)
-  meta: PaginationMeta;
-}
+export class PaginatedFrameBases extends Paginated(FrameBase) {}
 
 @Resolver(() => FrameBase)
 export class FrameBasesResolver {
@@ -68,7 +22,7 @@ export class FrameBasesResolver {
   }
 
   @Query(() => PaginatedFrameBases, { name: 'frameBases' })
-  findAll(@Args() paginationArgs?: OptionalPaginationArgs) {
+  findAll(@Args() paginationArgs?: PaginationArgs) {
     if (paginationArgs && Object.keys(paginationArgs).length > 0) {
       return this.frameBasesService.findAllWithOptions(paginationArgs);
     }
@@ -76,7 +30,7 @@ export class FrameBasesResolver {
   }
 
   @Query(() => PaginatedFrameBases, { name: 'paginatedFrameBases' })
-  findAllPaginated(@Args() paginationArgs: OptionalPaginationArgs) {
+  findAllPaginated(@Args() paginationArgs: PaginationArgs) {
     return this.frameBasesService.findAllWithOptions(paginationArgs);
   }
 

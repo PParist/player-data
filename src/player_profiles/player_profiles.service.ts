@@ -7,26 +7,22 @@ import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { generateSuperUniquePlayerName } from 'src/common/utils/random';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import {
-  OptionalPaginationArgs,
-  PaginatedPlayerProfiles,
-} from './player_profiles.resolver';
+import { PaginationArgs } from '../common/pagination/pagination.types';
+import { PaginatedPlayerProfiles } from './player_profiles.resolver';
 import { MessageQueueService } from '../message_queue/message_queue.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
 export class PlayerProfilesService {
   constructor(
     private prisma: PrismaService,
     private cacheService: CacheLayerService,
     private readonly messageQueue: MessageQueueService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private getProfileCacheKey(uuid: string): string {
     return `player_profile:${uuid}`;
   }
 
-  private getListCacheKey(options?: OptionalPaginationArgs): string {
+  private getListCacheKey(options?: PaginationArgs): string {
     if (!options) return 'player_profiles:all';
 
     const {
@@ -107,7 +103,7 @@ export class PlayerProfilesService {
   }
 
   async findAllWithOptions(
-    options: OptionalPaginationArgs,
+    options: PaginationArgs,
   ): Promise<PaginatedPlayerProfiles> {
     try {
       const cacheKey = this.getListCacheKey(options);

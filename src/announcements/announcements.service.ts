@@ -6,10 +6,8 @@ import { UpdateAnnouncementInput } from './dto/update-announcement.input';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import {
-  OptionalPaginationArgs,
-  PaginatedAnnouncements,
-} from './announcements.resolver';
+import { PaginationArgs } from '../common/pagination/pagination.types';
+import { PaginatedAnnouncements } from './announcements.resolver';
 
 @Injectable()
 export class AnnouncementsService {
@@ -22,7 +20,7 @@ export class AnnouncementsService {
     return `announcement:${uuid}`;
   }
 
-  private getListCacheKey(options?: OptionalPaginationArgs): string {
+  private getListCacheKey(options?: PaginationArgs): string {
     if (!options) return 'announcements:all';
 
     const {
@@ -99,7 +97,7 @@ export class AnnouncementsService {
     }
   }
 
-  async findAllWithOptions(options: OptionalPaginationArgs) {
+  async findAllWithOptions(options: PaginationArgs) {
     try {
       const cacheKey = this.getListCacheKey(options);
       return this.cacheService.gets<PaginatedAnnouncements>(

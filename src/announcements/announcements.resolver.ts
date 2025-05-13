@@ -1,56 +1,14 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Int,
-  ArgsType,
-  Field,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ObjectType } from '@nestjs/graphql';
 import { AnnouncementsService } from './announcements.service';
 import { Announcement } from './entities/announcement.entity';
 import { CreateAnnouncementInput } from './dto/create-announcement.input';
 import { UpdateAnnouncementInput } from './dto/update-announcement.input';
-
-@ArgsType()
-export class OptionalPaginationArgs {
-  @Field(() => Int, { nullable: true, defaultValue: 1 })
-  page?: number;
-
-  @Field(() => Int, { nullable: true, defaultValue: 100 })
-  limit?: number;
-
-  @Field(() => String, { nullable: true, defaultValue: 'updatedAt' })
-  orderBy?: string;
-
-  @Field(() => String, { nullable: true, defaultValue: 'desc' })
-  orderDirection?: string;
-}
-
+import {
+  PaginationArgs,
+  Paginated,
+} from '../common/pagination/pagination.types';
 @ObjectType()
-export class PaginationMeta {
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  limit: number;
-
-  @Field(() => Int)
-  pages: number;
-}
-
-@ObjectType()
-export class PaginatedAnnouncements {
-  @Field(() => [Announcement])
-  data: Announcement[];
-
-  @Field(() => PaginationMeta)
-  meta: PaginationMeta;
-}
+export class PaginatedAnnouncements extends Paginated(Announcement) {}
 
 @Resolver(() => Announcement)
 export class AnnouncementsResolver {
@@ -65,7 +23,7 @@ export class AnnouncementsResolver {
   }
 
   @Query(() => PaginatedAnnouncements, { name: 'announcements' })
-  findAll(@Args() paginationArgs?: OptionalPaginationArgs) {
+  findAll(@Args() paginationArgs?: PaginationArgs) {
     if (paginationArgs && Object.keys(paginationArgs).length > 0) {
       return this.announcementsService.findAllWithOptions(paginationArgs);
     }
@@ -73,7 +31,7 @@ export class AnnouncementsResolver {
   }
 
   @Query(() => PaginatedAnnouncements, { name: 'paginatedAnnouncements' })
-  findAllPaginated(@Args() paginationArgs: OptionalPaginationArgs) {
+  findAllPaginated(@Args() paginationArgs: PaginationArgs) {
     return this.announcementsService.findAllWithOptions(paginationArgs);
   }
 

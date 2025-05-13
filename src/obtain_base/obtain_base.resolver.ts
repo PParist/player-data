@@ -1,60 +1,15 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Int,
-  ArgsType,
-  Field,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ObjectType } from '@nestjs/graphql';
 import { ObtainBaseService } from './obtain_base.service';
 import { ObtainBase } from './entities/obtain_base.entity';
 import { CreateObtainBaseInput } from './dto/create-obtain_base.input';
 import { UpdateObtainBaseInput } from './dto/update-obtain_base.input';
-import { OrderDirection } from '../common/order/order-direction';
-
-@ArgsType()
-export class OptionalPaginationArgs {
-  @Field(() => Int, { nullable: true, defaultValue: 1 })
-  page?: number;
-
-  @Field(() => Int, { nullable: true, defaultValue: 100 })
-  limit?: number;
-
-  @Field(() => String, { nullable: true, defaultValue: 'updatedAt' })
-  orderBy?: string;
-
-  @Field(() => OrderDirection, {
-    nullable: true,
-    defaultValue: OrderDirection.desc,
-  })
-  orderDirection?: OrderDirection;
-}
+import {
+  PaginationArgs,
+  Paginated,
+} from '../common/pagination/pagination.types';
 
 @ObjectType()
-export class PaginationMeta {
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  limit: number;
-
-  @Field(() => Int)
-  pages: number;
-}
-
-@ObjectType()
-export class PaginatedObtainBases {
-  @Field(() => [ObtainBase])
-  data: ObtainBase[];
-
-  @Field(() => PaginationMeta)
-  meta: PaginationMeta;
-}
+export class PaginatedObtainBases extends Paginated(ObtainBase) {}
 
 @Resolver(() => ObtainBase)
 export class ObtainBaseResolver {
@@ -67,9 +22,17 @@ export class ObtainBaseResolver {
     return this.obtainBaseService.create(createObtainBaseInput);
   }
 
-  @Query(() => [ObtainBase], { name: 'obtainBases' })
-  findAll() {
+  @Query(() => PaginatedObtainBases, { name: 'obtainBases' })
+  findAll(@Args() paginationArgs?: PaginationArgs) {
+    if (paginationArgs && Object.keys(paginationArgs).length > 0) {
+      return this.obtainBaseService.findAllWithOptions(paginationArgs);
+    }
     return this.obtainBaseService.findAll();
+  }
+
+  @Query(() => PaginatedObtainBases, { name: 'paginatedObtainBases' })
+  findAllPaginated(@Args() paginationArgs: PaginationArgs) {
+    return this.obtainBaseService.findAllWithOptions(paginationArgs);
   }
 
   @Query(() => ObtainBase, { name: 'obtainBase' })
