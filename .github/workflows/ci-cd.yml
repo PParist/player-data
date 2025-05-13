@@ -70,7 +70,7 @@ jobs:
   # ขั้นตอนการ deploy แยกตาม environment
   deploy-dev:
     needs: build-and-test
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/developer'
     runs-on: ubuntu-latest
     environment: dev
     
