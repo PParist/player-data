@@ -1,33 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from 'nestjs-prisma';
-import { CreateObtainBaseInput } from './dto/create-obtain_base.input';
-import { UpdateObtainBaseInput } from './dto/update-obtain_base.input';
+import { CreateAvatarBaseInput } from './dto/create-avatar_base.input';
+import { UpdateAvatarBaseInput } from './dto/update-avatar_base.input';
 import { CACHE_KEYS, CACHE_TTL } from '@common/constants/cache';
 import { DatabaseErrorHandler } from 'src/common/errors/prisma.error';
 import { CacheLayerService } from '../cache/cache-layer.service';
-import { MessageQueueService } from '../message_queue/message_queue.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   OptionalPaginationArgs,
-  PaginatedObtainBases,
-} from './obtain_base.resolver';
+  PaginatedAvatarBases,
+} from './avatar_base.resolver';
 
 @Injectable()
-export class ObtainBaseService {
+export class AvatarBaseService {
   constructor(
     private prisma: PrismaService,
     private cacheService: CacheLayerService,
-    private readonly messageQueue: MessageQueueService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  private getObtainCacheKey(uuid: string): string {
-    return `obtain_base:${uuid}`;
+  private getAvatarCacheKey(uuid: string): string {
+    return `avatar_base:${uuid}`;
   }
 
   private getListCacheKey(options?: OptionalPaginationArgs): string {
-    if (!options) return 'obtain_bases:all';
+    if (!options) return `${CACHE_KEYS.ALL_AVATARBASES}`;
 
     const {
       page = 1,
@@ -35,56 +31,54 @@ export class ObtainBaseService {
       orderBy = 'updatedAt',
       orderDirection = 'desc',
     } = options;
-    return `obtain_bases:${page}:${limit}:${orderBy}:${orderDirection}`;
+    return `avatarbases:${page}:${limit}:${orderBy}:${orderDirection}`;
   }
 
-  async create(createObtainBaseInput: CreateObtainBaseInput) {
+  async create(createAvatarBaseInput: CreateAvatarBaseInput) {
     try {
-      const newObtainUuid = uuidv4();
-      const obtainBase = await this.prisma.obtainBases.create({
+      const newAvatarUuid = uuidv4();
+      const avatarBase = await this.prisma.avatarBases.create({
         data: {
-          uuid: newObtainUuid,
-          ...createObtainBaseInput,
+          uuid: newAvatarUuid,
+          ...createAvatarBaseInput,
           createdAt: new Date(),
-          createdBy: newObtainUuid,
+          createdBy: newAvatarUuid,
           updatedAt: new Date(),
-          updatedBy: newObtainUuid,
+          updatedBy: newAvatarUuid,
           deletedAt: null,
           deletedBy: null,
           version: 1,
         },
       });
 
-      // Invalidate cache after creating a new obtain base
-      await this.cacheService.invalidatePattern('obtain_bases:*');
-
-      return obtainBase;
+      await this.cacheService.invalidatePattern('avatar_bases:*');
+      return avatarBase;
     } catch (error) {
       DatabaseErrorHandler.handleError(
         error,
-        'create obtain base',
-        'obtainBase',
+        'create avatar base',
+        'avatarBase',
       );
     }
   }
 
   async findAll() {
     try {
-      const cacheKey = `${CACHE_KEYS.ALL_OBTAINBASES || 'all_obtains'}:all`;
-      return this.cacheService.gets<PaginatedObtainBases>(
+      const cacheKey = `${CACHE_KEYS.ALL_AVATARBASES}`;
+      return this.cacheService.gets<PaginatedAvatarBases>(
         cacheKey,
         async () => {
-          const obtainBases = await this.prisma.obtainBases.findMany({
+          const avatarBases = await this.prisma.avatarBases.findMany({
             where: { deletedAt: null },
             orderBy: { updatedAt: 'desc' },
           });
 
-          const totalCount = await this.prisma.obtainBases.count({
+          const totalCount = await this.prisma.avatarBases.count({
             where: { deletedAt: null },
           });
 
           return {
-            data: obtainBases,
+            data: avatarBases,
             meta: {
               total: totalCount,
               page: 1,
@@ -99,8 +93,8 @@ export class ObtainBaseService {
     } catch (error) {
       DatabaseErrorHandler.handleError(
         error,
-        'find all obtain bases',
-        'obtainBases',
+        'find all avatar bases',
+        'avatarBases',
       );
     }
   }
@@ -108,7 +102,7 @@ export class ObtainBaseService {
   async findAllWithOptions(options: OptionalPaginationArgs) {
     try {
       const cacheKey = this.getListCacheKey(options);
-      return this.cacheService.gets<PaginatedObtainBases>(
+      return this.cacheService.gets<PaginatedAvatarBases>(
         cacheKey,
         async () => {
           const {
@@ -122,20 +116,20 @@ export class ObtainBaseService {
           const orderOption = {};
           orderOption[orderBy] = orderDirection;
 
-          const [obtainBases, totalCount] = await Promise.all([
-            this.prisma.obtainBases.findMany({
+          const [avatarBases, totalCount] = await Promise.all([
+            this.prisma.avatarBases.findMany({
               skip,
               take: limit,
               orderBy: orderOption,
               where: { deletedAt: null },
             }),
-            this.prisma.obtainBases.count({
+            this.prisma.avatarBases.count({
               where: { deletedAt: null },
             }),
           ]);
 
           return {
-            data: obtainBases,
+            data: avatarBases,
             meta: {
               total: totalCount,
               page,
@@ -150,29 +144,29 @@ export class ObtainBaseService {
     } catch (error) {
       DatabaseErrorHandler.handleError(
         error,
-        'find obtain bases with options',
-        'obtainBases',
+        'find avatar bases with options',
+        'avatarBases',
       );
     }
   }
 
   async findOne(uuid: string) {
     try {
-      const cacheKey = this.getObtainCacheKey(uuid);
+      const cacheKey = this.getAvatarCacheKey(uuid);
       return this.cacheService.get(
         cacheKey,
         async () => {
-          const obtainBase = await this.prisma.obtainBases.findUnique({
+          const avatarBase = await this.prisma.avatarBases.findUnique({
             where: { uuid },
           });
 
-          if (!obtainBase) {
+          if (!avatarBase) {
             throw new NotFoundException(
-              `Obtain base with uuid ${uuid} not found`,
+              `Avatar base with uuid ${uuid} not found`,
             );
           }
 
-          return obtainBase;
+          return avatarBase;
         },
         CACHE_TTL.LOCAL_FINDONE,
       );
@@ -182,57 +176,55 @@ export class ObtainBaseService {
       }
       DatabaseErrorHandler.handleError(
         error,
-        `find obtain base with uuid ${uuid}`,
-        'obtainBase',
+        `find avatar base with uuid ${uuid}`,
+        'avatarBase',
       );
     }
   }
 
-  async update(uuid: string, updateObtainBaseInput: UpdateObtainBaseInput) {
+  async update(uuid: string, updateAvatarBaseInput: UpdateAvatarBaseInput) {
     try {
-      const updatedObtain = await this.prisma.obtainBases.update({
+      const updatedAvatar = await this.prisma.avatarBases.update({
         where: { uuid },
         data: {
-          ...updateObtainBaseInput,
+          ...updateAvatarBaseInput,
           updatedAt: new Date(),
           updatedBy: uuid,
         },
       });
 
-      // Clear related caches
       await Promise.all([
-        this.cacheService.invalidate(this.getObtainCacheKey(uuid)),
-        this.cacheService.invalidatePattern('obtain_bases:*'),
+        this.cacheService.invalidate(this.getAvatarCacheKey(uuid)),
+        this.cacheService.invalidatePattern('avatar_bases:*'),
       ]);
 
-      return updatedObtain;
+      return updatedAvatar;
     } catch (error) {
       DatabaseErrorHandler.handleError(
         error,
-        `update obtain base with uuid ${uuid}`,
-        'obtainBase',
+        `update avatar base with uuid ${uuid}`,
+        'avatarBase',
       );
     }
   }
 
   async remove(uuid: string) {
     try {
-      const deletedObtain = await this.prisma.obtainBases.delete({
+      const deletedAvatar = await this.prisma.avatarBases.delete({
         where: { uuid },
       });
 
-      // Clear related caches
       await Promise.all([
-        this.cacheService.invalidate(this.getObtainCacheKey(uuid)),
-        this.cacheService.invalidatePattern('obtain_bases:*'),
+        this.cacheService.invalidate(this.getAvatarCacheKey(uuid)),
+        this.cacheService.invalidatePattern('avatar_bases:*'),
       ]);
 
-      return deletedObtain;
+      return deletedAvatar;
     } catch (error) {
       DatabaseErrorHandler.handleError(
         error,
-        `remove obtain base with uuid ${uuid}`,
-        'obtainBase',
+        `remove avatar base with uuid ${uuid}`,
+        'avatarBase',
       );
     }
   }

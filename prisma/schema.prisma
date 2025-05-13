@@ -38,7 +38,7 @@ model PlayerProfiles {
   @@map("player_profiles")
 }
 
-model AvatarBase {
+model AvatarBases {
   id               Int       @id @default(autoincrement())
   uuid             String    @unique
   imageUrl         String
@@ -57,7 +57,7 @@ model AvatarBase {
   @@map("avatar_bases")
 }
 
-model FrameBase {
+model FrameBases {
   id               Int       @id @default(autoincrement())
   uuid             String    @unique
   imageUrl         String
@@ -147,8 +147,8 @@ model ObtainBases {
   version      Int       
 
   // Relations
-  avatarBases   AvatarBase[]
-  frameBases    FrameBase[]
+  avatarBases   AvatarBases[]
+  frameBases    FrameBases[]
   costumeBases  CostumeBases[]
 
   @@map("obtain_bases")

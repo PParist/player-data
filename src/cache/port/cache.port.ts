@@ -12,7 +12,12 @@ export interface CachePort {
    * @param value Value to cache
    * @param ttl Time to live in seconds (optional)
    */
-  set<T>(key: string, value: T, ttl?: number): Promise<void>;
+  set<T>(
+    key: string,
+    value: T,
+    localttl?: number,
+    distributedttl?: number,
+  ): Promise<void>;
 
   /**
    * Delete a value from cache

@@ -70,7 +70,7 @@ export class PlayerProfilesService {
   async findAll() {
     try {
       const cacheKey = `${CACHE_KEYS.ALL_PROFILES}:all`;
-      return this.cacheService.get<PaginatedPlayerProfiles>(
+      return this.cacheService.gets<PaginatedPlayerProfiles>(
         cacheKey,
         async () => {
           const profiles = await this.prisma.playerProfiles.findMany({
@@ -94,7 +94,8 @@ export class PlayerProfilesService {
 
           return result;
         },
-        CACHE_TTL.ALL_PROFILES,
+        CACHE_TTL.LOCAL_FINDALL,
+        CACHE_TTL.DISTRIBUTED_FINDALL,
       );
     } catch (error) {
       DatabaseErrorHandler.handleError(
@@ -110,7 +111,7 @@ export class PlayerProfilesService {
   ): Promise<PaginatedPlayerProfiles> {
     try {
       const cacheKey = this.getListCacheKey(options);
-      return this.cacheService.get<PaginatedPlayerProfiles>(
+      return this.cacheService.gets<PaginatedPlayerProfiles>(
         cacheKey,
         async () => {
           const {
@@ -146,7 +147,8 @@ export class PlayerProfilesService {
             },
           };
         },
-        CACHE_TTL.ALL_PROFILES,
+        CACHE_TTL.LOCAL_FINDALL,
+        CACHE_TTL.DISTRIBUTED_FINDALL,
       );
     } catch (error) {
       DatabaseErrorHandler.handleError(
@@ -175,7 +177,7 @@ export class PlayerProfilesService {
 
           return playerProfile;
         },
-        600, // TTL 10 นาที
+        CACHE_TTL.LOCAL_FINDONE, // TTL 10 นาที
       );
     } catch (error) {
       if (error instanceof NotFoundException) {

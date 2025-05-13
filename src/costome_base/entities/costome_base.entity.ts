@@ -4,7 +4,7 @@ import { BaseModel } from 'src/common/models/base.model';
 @ObjectType()
 export class CostomeBase extends BaseModel {
   @Field(() => String, { description: 'Equipment ID' })
-  equimentID: string;
+  equipmentId: string;
 
   @Field(() => String, { description: 'Equipment Name', nullable: true })
   name: string;
@@ -22,7 +22,7 @@ export class CostomeBase extends BaseModel {
   prefabPath?: string;
 
   @Field(() => Int, { description: 'Equioment Type' })
-  equipmentType: number;
+  equipType: number;
 
   @Field(() => Int, { description: 'Model' })
   model: number;

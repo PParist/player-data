@@ -57,9 +57,6 @@ export class PaginatedPlayerProfiles {
   meta: PaginationMeta;
 }
 
-// @ObjectType()
-// class PlayerProfileConnection extends Paginated(PlayerProfile) {}
-
 @Resolver(() => PlayerProfile)
 export class PlayerProfilesResolver {
   constructor(private readonly playerProfilesService: PlayerProfilesService) {}
