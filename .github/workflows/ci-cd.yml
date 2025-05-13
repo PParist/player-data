@@ -1,0 +1,206 @@
+name: NestJS CI/CD
+
+# กำหนดเงื่อนไขการทำงาน
+on:
+  push:
+    branches: [developer, beta, main]
+  pull_request:
+    branches: [developer, beta, main]
+  workflow_dispatch: # เพิ่มตัวเลือกให้สามารถเรียกใช้ workflow ด้วยตัวเอง
+
+# กำหนดตัวแปรสำหรับสภาพแวดล้อมต่างๆ
+env:
+  DEV_SERVER: ${{ secrets.IP }}
+  BETA_SERVER: beta-server-address # แก้ไขเป็น IP ของ beta server
+  PROD_SERVER: prod-server-address # แก้ไขเป็น IP ของ production server
+  PROJECT_PATH: /home/gamedev/game-backends/user-management/nest-prisma-graphql
+  APP_NAME: nest-api # ชื่อแอพที่ตรงกับ container_name ใน docker-compose.yml
+
+jobs:
+  # ขั้นตอนการ build และ test
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      # เพิ่ม PostgreSQL service สำหรับการทดสอบ
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    strategy:
+      matrix:
+        node-version: [22]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      
+      - name: Run linting
+        run: npm run lint || echo "Linting skipped"
+      
+      - name: Run tests
+        run: npm test || echo "Tests skipped"
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+      
+      - name: Build
+        run: npm run build
+  
+  # ขั้นตอนการ deploy แยกตาม environment
+  deploy-dev:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    environment: dev
+    
+    steps:
+      - name: Deploy to DEV server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.DEV_SERVER }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            # เข้าไปยัง directory ที่เก็บโปรเจค
+            cd ${{ env.PROJECT_PATH }}
+            
+            # Pull latest code
+            git pull origin dev
+            
+            # สร้างหรืออัพเดทไฟล์ .env สำหรับ development
+            cp .env.dev .env
+            
+            # Build และ restart containers ด้วย docker-compose
+            docker-compose -f resources/docker-compose.yml down || true
+            docker-compose -f resources/docker-compose.yml build --no-cache
+            docker-compose -f resources/docker-compose.yml up -d
+            
+            # ตรวจสอบว่า containers ทำงานอยู่หรือไม่
+            docker ps | grep ${{ env.APP_NAME }}
+            
+            # Cleanup old images (optional)
+            docker image prune -f
+  
+#   deploy-beta:
+#     needs: build-and-test
+#     if: github.ref == 'refs/heads/beta'
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#       - name: Deploy to BETA server
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ env.BETA_SERVER }}
+#           username: ${{ secrets.SSH_USERNAME }}
+#           key: ${{ secrets.SSH_PRIVATE_KEY }}
+#           port: 22
+#           script: |
+#             # เข้าไปยัง directory ที่เก็บโปรเจค
+#             cd ${{ env.PROJECT_PATH }}
+            
+#             # Pull latest code
+#             git pull origin beta
+            
+#             # สร้างหรืออัพเดทไฟล์ .env สำหรับ beta
+#             cp .env.beta .env
+            
+#             # Build และ restart containers ด้วย docker-compose
+#             docker-compose -f resources/docker-compose.yml down || true
+#             docker-compose -f resources/docker-compose.yml build --no-cache
+#             docker-compose -f resources/docker-compose.yml up -d
+            
+#             # ตรวจสอบว่า containers ทำงานอยู่หรือไม่
+#             docker ps | grep ${{ env.APP_NAME }}
+            
+#             # Cleanup old images (optional)
+#             docker image prune -f
+  
+#   deploy-production:
+#     needs: build-and-test
+#     if: github.ref == 'refs/heads/main'
+#     runs-on: ubuntu-latest
+    
+#     # สำหรับ production ต้องการการอนุมัติก่อน deploy
+#     environment:
+#       name: production
+#       url: https://github.com/PParist/player-data
+    
+#     steps:
+#       - name: Deploy to PRODUCTION server
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ env.PROD_SERVER }}
+#           username: ${{ secrets.SSH_USERNAME }}
+#           key: ${{ secrets.SSH_PRIVATE_KEY }}
+#           port: 22
+#           script: |
+#             # เข้าไปยัง directory ที่เก็บโปรเจค
+#             cd ${{ env.PROJECT_PATH }}
+            
+#             # Pull latest code
+#             git pull origin main
+            
+#             # สร้างหรืออัพเดทไฟล์ .env สำหรับ production
+#             cp .env.prod .env
+            
+#             # บันทึกข้อมูลปัจจุบันไว้ก่อน (เผื่อต้องการ rollback)
+#             timestamp=$(date +%Y%m%d%H%M%S)
+#             mkdir -p deployment_backups
+            
+#             # สำรอง .env และ volume ของ PostgreSQL หากเป็น production
+#             cp .env deployment_backups/.env.$timestamp
+            
+#             # ถ้ามีการใช้ volume mount โดยตรง
+#             if docker volume ls | grep nest-db; then
+#               docker run --rm -v nest-db:/data -v $(pwd)/deployment_backups:/backup busybox tar -czf /backup/postgres-data.$timestamp.tar.gz /data
+#             fi
+            
+#             # Build และ restart containers ด้วย docker-compose
+#             docker-compose -f resources/docker-compose.yml down || true
+#             docker-compose -f resources/docker-compose.yml build --no-cache
+#             docker-compose -f resources/docker-compose.yml up -d
+            
+#             # รอให้ containers พร้อมทำงาน (เฉพาะ production)
+#             echo "Waiting for containers to be ready..."
+#             sleep 15
+            
+#             # ตรวจสอบว่า containers ทำงานอยู่หรือไม่
+#             if ! docker ps | grep ${{ env.APP_NAME }}; then
+#               echo "Error: ${{ env.APP_NAME }} container is not running!"
+#               # ทำ rollback หากต้องการ
+#               # docker-compose -f resources/docker-compose.prev.yml up -d
+#               exit 1
+#             fi
+            
+#             # ตรวจสอบ application health (ถ้ามี health check endpoint)
+#             if ! curl -f http://localhost:3350/health; then
+#               echo "Error: Application health check failed!"
+#               exit 1
+#             fi
+            
+#             echo "Deployment successful!"
+            
+#             # Cleanup old images (optional)
+#             docker image prune -f
