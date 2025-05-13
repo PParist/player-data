@@ -30,7 +30,7 @@ model PlayerProfiles {
   updatedBy         String?   @map("updated_by")
   deletedAt         DateTime? @map("deleted_at")
   deletedBy         String?   @map("deleted_by")
-  version           Int       
+  version           Int       @map("version")
 
   // Relations
   costumes          Costumes[]
@@ -41,15 +41,15 @@ model PlayerProfiles {
 model AvatarBases {
   id               Int       @id @default(autoincrement())
   uuid             String    @unique
-  imageUrl         String
-  obtainsBaseUuid  String
-  createdAt        DateTime  @default(now())
-  createdBy        String?
-  updatedAt        DateTime  @updatedAt
-  updatedBy        String?
-  deletedAt        DateTime?
-  deletedBy        String?
-  version          Int       
+  imageUrl         String    @map("image_url")
+  obtainsBaseUuid  String    @map("obtains_base_uuid")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  createdBy        String?   @map("created_by")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  updatedBy        String?   @map("updated_by")
+  deletedAt        DateTime? @map("deleted_at")
+  deletedBy        String?   @map("deleted_by")
+  version          Int       @map("version")
 
   // Relations
   obtainBase       ObtainBases @relation(fields: [obtainsBaseUuid], references: [uuid])
@@ -60,15 +60,15 @@ model AvatarBases {
 model FrameBases {
   id               Int       @id @default(autoincrement())
   uuid             String    @unique
-  imageUrl         String
-  obtainsBaseUuid  String
-  createdAt        DateTime  @default(now())
-  createdBy        String?
-  updatedAt        DateTime  @updatedAt
-  updatedBy        String?
-  deletedAt        DateTime?
-  deletedBy        String?
-  version          Int      
+  imageUrl         String    @map("image_url")
+  obtainsBaseUuid  String    @map("obtains_base_uuid")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  createdBy        String?   @map("created_by")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  updatedBy        String?   @map("updated_by")
+  deletedAt        DateTime? @map("deleted_at")
+  deletedBy        String?   @map("deleted_by")
+  version          Int       @map("version")
 
   // Relations
   obtainBase       ObtainBases @relation(fields: [obtainsBaseUuid], references: [uuid])
@@ -86,19 +86,19 @@ model CostumeBases {
   imagePath       String?   @map("image_path")
   prefabPath      String?   @map("prefab_path")
   equipType       Int       @map("equip_type")
-  model           Int
-  tier            Int
+  model           Int       @map("model")
+  tier            Int       @map("tier")
   isActive        Int       @map("is_active")
   isDefault       Int       @map("is_default")
   isColorable     Int       @map("is_colorable")
-  colors          String?
+  colors          String?   @map("colors")
   createdAt       DateTime  @map("created_at")
   createdBy       String    @map("created_by")
   updatedAt       DateTime? @map("updated_at")
   updatedBy       String?   @map("updated_by")
   deletedAt       DateTime? @map("deleted_at")
   deletedBy       String?   @map("deleted_by")
-  version         Int       
+  version         Int       @map("version")
 
   // Relations
   obtainBase      ObtainBases? @relation(fields: [obtainsBaseUuid], references: [uuid])
@@ -123,7 +123,7 @@ model Costumes {
   updatedBy       String?   @map("updated_by")
   deletedAt       DateTime? @map("deleted_at")
   deletedBy       String?   @map("deleted_by")
-  version         Int      
+  version         Int       @map("version")
 
   // Relations
   player          PlayerProfiles @relation(fields: [playerUuid], references: [uuid])
@@ -137,14 +137,14 @@ model ObtainBases {
   uuid         String    @unique
   obtainsType  String?   @map("obtains_type")
   typesUuid    String?   @map("types_uuid")
-  info         String?
+  info         String?   @map("info")
   createdAt    DateTime  @map("created_at")
   createdBy    String    @map("created_by")
   updatedAt    DateTime? @map("updated_at")
   updatedBy    String?   @map("updated_by")
   deletedAt    DateTime? @map("deleted_at")
   deletedBy    String?   @map("deleted_by")
-  version      Int       
+  version      Int       @map("version")
 
   // Relations
   avatarBases   AvatarBases[]
@@ -157,15 +157,15 @@ model ObtainBases {
 model Announcements {
   id           Int       @id @default(autoincrement())
   uuid         String    @unique
-  info         String?
-  image        String?
+  info         String?   @map("info")
+  image        String?   @map("image")
   createdAt    DateTime  @map("created_at")
   createdBy    String    @map("created_by")
   updatedAt    DateTime? @map("updated_at")
   updatedBy    String?   @map("updated_by")
   deletedAt    DateTime? @map("deleted_at")
   deletedBy    String?   @map("deleted_by")
-  version      Int       
+  version      Int       @map("version")
 
   @@map("announcements")
 }
@@ -173,15 +173,15 @@ model Announcements {
 model TalentBases {
   id           Int       @id @default(autoincrement())
   uuid         String    @unique
-  stage        Int
-  type         String
+  stage        Int       @map("stage")
+  type         String    @map("type")
   levelMax     Int       @map("level_max")
-  stat         String    // 2, 0.10%, 5.00%
+  stat         String    @map("stat") // 2, 0.10%, 5.00%
   skillPoint   Int       @map("skill_point")
   zenySpend    Int       @map("zeny_spend")  // 1000, 10000, 100000
   imageParth   String?   @map("image_parth") // มีการสะกดผิดจาก path เป็น parth ตามต้นฉบับ
-  name         String
-  detail       String?
+  name         String    @map("name")
+  detail       String?   @map("detail")
   isActive     Int       @map("is_active")
   createdAt    DateTime  @map("created_at")
   createdBy    String    @map("created_by")
@@ -189,7 +189,7 @@ model TalentBases {
   updatedBy    String?   @map("updated_by")
   deletedAt    DateTime? @map("deleted_at")
   deletedBy    String?   @map("deleted_by")
-  version      Int       
+  version      Int       @map("version")
 
   @@map("talent_bases")
 }

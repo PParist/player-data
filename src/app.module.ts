@@ -19,6 +19,7 @@ import { CacheModule } from './cache/cache.module';
 import { MessageQueueModule } from './message_queue/message_queue.module';
 import { AvatarBaseModule } from './avatar_base/avatar_base.module';
 import { FrameBasesModule } from './frame_bases/frame_bases.module';
+import { AnnouncementsModule } from './announcements/announcements.module';
 import config from './common/configs/config';
 
 registerGraphQLEnums();
@@ -53,6 +54,7 @@ registerGraphQLEnums();
     MessageQueueModule.registerAsync(),
     AvatarBaseModule,
     FrameBasesModule,
+    AnnouncementsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, DateScalar],
