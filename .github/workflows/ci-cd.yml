@@ -13,7 +13,7 @@ env:
   DEV_SERVER: ${{ secrets.IP }}
   BETA_SERVER: beta-server-address # แก้ไขเป็น IP ของ beta server
   PROD_SERVER: prod-server-address # แก้ไขเป็น IP ของ production server
-  PROJECT_PATH: /home/gamedev/game-backends/user-management/nest-prisma-graphql
+  PROJECT_PATH: /home/gamedev/game-backends/player-data
   APP_NAME: nest-api # ชื่อแอพที่ตรงกับ container_name ใน docker-compose.yml
 
 jobs:
