@@ -18,6 +18,7 @@ import { PlayerProfilesModule } from './player_profiles/player_profiles.module';
 import { CacheModule } from './cache/cache.module';
 import { MessageQueueModule } from './message_queue/message_queue.module';
 import { AvatarBaseModule } from './avatar_base/avatar_base.module';
+import { FrameBasesModule } from './frame_bases/frame_bases.module';
 import config from './common/configs/config';
 
 registerGraphQLEnums();
@@ -51,6 +52,7 @@ registerGraphQLEnums();
     CacheModule,
     MessageQueueModule.registerAsync(),
     AvatarBaseModule,
+    FrameBasesModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver, DateScalar],
