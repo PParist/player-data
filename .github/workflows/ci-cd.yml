@@ -93,9 +93,9 @@ jobs:
             cp .env.dev .env
             
             # Build และ restart containers ด้วย docker-compose
-            docker-compose -f resources/docker-compose.yml down || true
-            docker-compose -f resources/docker-compose.yml build --no-cache
-            docker-compose -f resources/docker-compose.yml up -d
+            docker compose -f resources/docker-compose.yml down || true
+            docker compose -f resources/docker-compose.yml build --no-cache
+            docker compose -f resources/docker-compose.yml up -d
             
             # ตรวจสอบว่า containers ทำงานอยู่หรือไม่
             docker ps | grep ${{ env.APP_NAME }}
