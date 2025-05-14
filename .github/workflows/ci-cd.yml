@@ -87,7 +87,7 @@ jobs:
             cd ${{ env.PROJECT_PATH }}
             
             # Pull latest code
-            git pull origin dev
+            git pull origin developer
             
             # สร้างหรืออัพเดทไฟล์ .env สำหรับ development
             cp .env.dev .env
