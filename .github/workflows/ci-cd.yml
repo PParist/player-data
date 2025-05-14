@@ -81,7 +81,7 @@ jobs:
           host: ${{ env.DEV_SERVER }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
+          port: 3350
           script: |
             # เข้าไปยัง directory ที่เก็บโปรเจค
             cd ${{ env.PROJECT_PATH }}
@@ -102,6 +102,7 @@ jobs:
             
             # Cleanup old images (optional)
             docker image prune -f
+          debug: true # เปิดใช้งาน debug mode เพื่อดูรายละเอียดการทำงาน
   
 #   deploy-beta:
 #     needs: build-and-test
