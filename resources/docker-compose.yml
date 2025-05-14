@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: resources/Dockerfile
     ports:
-      - '3382:3000'
+      - '3382:3001'
     depends_on:
       - postgres
     env_file:
