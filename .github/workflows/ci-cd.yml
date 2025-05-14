@@ -81,7 +81,7 @@ jobs:
           host: ${{ env.DEV_SERVER }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 3350
+          port: 22
           script: |
             # เข้าไปยัง directory ที่เก็บโปรเจค
             cd ${{ env.PROJECT_PATH }}
